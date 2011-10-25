@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<!-- Generated with Dr.js -->
+<html lang="en"><head><meta charset="utf-8"><title>mapcontrols.js</title><link rel="stylesheet" href="dr.css"></head><body id="src-dr-js"><code id="L1"><span class="ln">1</span><b>if</b> (<b>typeof</b> INTERACT<span class="s"> == </span><i>'<b>undefined</b>'</i>) {
+</code><code id="L2"><span class="ln">2</span>    <span class="c">// ┌──────────────────────────────────────────────────────────────────────────────────────┐ \\</span>
+</code><code id="L3"><span class="ln">3</span>    <span class="c">// │ Eve <span class="d">0.3</span><span class="d">.2</span><span class="s"> - </span>JavaScript Events Library                                                │ \\</span>
+</code><code id="L4"><span class="ln">4</span>    <span class="c">// ├──────────────────────────────────────────────────────────────────────────────────────┤ \\</span>
+</code><code id="L5"><span class="ln">5</span>    <span class="c">// │ Copyright (c) <span class="d">2008</span>-<span class="d">2011</span> Dmitry Baranovskiy (http://dmitry.baranovskiy.com/)          │ \\</span>
+</code><code id="L6"><span class="ln">6</span>    <span class="c">// │ Licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) license. │ \\</span>
+</code><code id="L7"><span class="ln">7</span>    <span class="c">// └──────────────────────────────────────────────────────────────────────────────────────┘ \\</span>
+</code><code id="L8"><span class="ln">8</span>    
+</code><code id="L9"><span class="ln">9</span>    (<b>function</b> (glob) {
+</code><code id="L10"><span class="ln">10</span>        <b>var</b> version<span class="s"> = </span><i>"<span class="d">0.3</span><span class="d">.2</span>"</i>,
+</code><code id="L11"><span class="ln">11</span>            has<span class="s"> = </span><i>"hasOwnProperty"</i>,
+</code><code id="L12"><span class="ln">12</span>            separator<span class="s"> = </span>/[\.\/]/,
+</code><code id="L13"><span class="ln">13</span>            wildcard<span class="s"> = </span><i>"*"</i>,
+</code><code id="L14"><span class="ln">14</span>            fun<span class="s"> = </span><b>function</b> () {},
+</code><code id="L15"><span class="ln">15</span>            numsort<span class="s"> = </span><b>function</b> (a, b) {
+</code><code id="L16"><span class="ln">16</span>                <b>return</b> a<span class="s"> - </span>b;
+</code><code id="L17"><span class="ln">17</span>            },
+</code><code id="L18"><span class="ln">18</span>            current_event,
+</code><code id="L19"><span class="ln">19</span>            stop,
+</code><code id="L20"><span class="ln">20</span>            events<span class="s"> = </span>{n: {}},
+</code><code id="L21"><span class="ln">21</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L22"><span class="ln">22</span><span class="c">        <span class="s"> * </span>eve
+</span></code><code id="L23"><span class="ln">23</span><span class="c">         [ method ]
+</span></code><code id="L24"><span class="ln">24</span><span class="c">         **
+</span></code><code id="L25"><span class="ln">25</span><span class="c">        <span class="s"> * </span>Fires event <b>with</b> given `name`, given scope and other parameters.
+</span></code><code id="L26"><span class="ln">26</span><span class="c">         **
+</span></code><code id="L27"><span class="ln">27</span><span class="c">         > Arguments
+</span></code><code id="L28"><span class="ln">28</span><span class="c">         **
+</span></code><code id="L29"><span class="ln">29</span><span class="c">        <span class="s"> - </span>name (string) name of the event, dot (`.`) or slash (`/`) separated
+</span></code><code id="L30"><span class="ln">30</span><span class="c">        <span class="s"> - </span>scope (object) context <b>for</b> the event handlers
+</span></code><code id="L31"><span class="ln">31</span><span class="c">        <span class="s"> - </span>varargs (...) the rest of arguments will be sent to event handlers
+</span></code><code id="L32"><span class="ln">32</span><span class="c">         **
+</span></code><code id="L33"><span class="ln">33</span><span class="c">        <span class="s"> = </span>(object) array of returned values from the listeners
+</span></code><code id="L34"><span class="ln">34</span><span class="c">        \*/</span>
+</code><code id="L35"><span class="ln">35</span>            eve<span class="s"> = </span><b>function</b> (name, scope) {
+</code><code id="L36"><span class="ln">36</span>                <b>var</b> e<span class="s"> = </span>events,
+</code><code id="L37"><span class="ln">37</span>                    oldstop<span class="s"> = </span>stop,
+</code><code id="L38"><span class="ln">38</span>                    args<span class="s"> = </span>Array.prototype.slice.call(arguments, <span class="d">2</span>),
+</code><code id="L39"><span class="ln">39</span>                    listeners<span class="s"> = </span>eve.listeners(name),
+</code><code id="L40"><span class="ln">40</span>                    z<span class="s"> = </span><span class="d">0</span>,
+</code><code id="L41"><span class="ln">41</span>                    f<span class="s"> = </span><b>false</b>,
+</code><code id="L42"><span class="ln">42</span>                    l,
+</code><code id="L43"><span class="ln">43</span>                    indexed<span class="s"> = </span>[],
+</code><code id="L44"><span class="ln">44</span>                    queue<span class="s"> = </span>{},
+</code><code id="L45"><span class="ln">45</span>                    out<span class="s"> = </span>[],
+</code><code id="L46"><span class="ln">46</span>                    errors<span class="s"> = </span>[];
+</code><code id="L47"><span class="ln">47</span>                current_event<span class="s"> = </span>name;
+</code><code id="L48"><span class="ln">48</span>                stop<span class="s"> = </span><span class="d">0</span>;
+</code><code id="L49"><span class="ln">49</span>                <b>for</b> (<b>var</b> i<span class="s"> = </span><span class="d">0</span>, ii<span class="s"> = </span>listeners.length; i &lt; ii; i++) <b>if</b> (<i>"zIndex"</i> <b>in</b> listeners[i]) {
+</code><code id="L50"><span class="ln">50</span>                    indexed.push(listeners[i].zIndex);
+</code><code id="L51"><span class="ln">51</span>                    <b>if</b> (listeners[i].zIndex &lt; <span class="d">0</span>) {
+</code><code id="L52"><span class="ln">52</span>                        queue[listeners[i].zIndex]<span class="s"> = </span>listeners[i];
+</code><code id="L53"><span class="ln">53</span>                    }
+</code><code id="L54"><span class="ln">54</span>                }
+</code><code id="L55"><span class="ln">55</span>                indexed.sort(numsort);
+</code><code id="L56"><span class="ln">56</span>                <b>while</b> (indexed[z] &lt; <span class="d">0</span>) {
+</code><code id="L57"><span class="ln">57</span>                    l<span class="s"> = </span>queue[indexed[z++]];
+</code><code id="L58"><span class="ln">58</span>                    out.push(l.apply(scope, args));
+</code><code id="L59"><span class="ln">59</span>                    <b>if</b> (stop) {
+</code><code id="L60"><span class="ln">60</span>                        stop<span class="s"> = </span>oldstop;
+</code><code id="L61"><span class="ln">61</span>                        <b>return</b> out;
+</code><code id="L62"><span class="ln">62</span>                    }
+</code><code id="L63"><span class="ln">63</span>                }
+</code><code id="L64"><span class="ln">64</span>                <b>for</b> (i<span class="s"> = </span><span class="d">0</span>; i &lt; ii; i++) {
+</code><code id="L65"><span class="ln">65</span>                    l<span class="s"> = </span>listeners[i];
+</code><code id="L66"><span class="ln">66</span>                    <b>if</b> (<i>"zIndex"</i> <b>in</b> l) {
+</code><code id="L67"><span class="ln">67</span>                        <b>if</b> (l.zIndex<span class="s"> == </span>indexed[z]) {
+</code><code id="L68"><span class="ln">68</span>                            out.push(l.apply(scope, args));
+</code><code id="L69"><span class="ln">69</span>                            <b>if</b> (stop) {
+</code><code id="L70"><span class="ln">70</span>                                stop<span class="s"> = </span>oldstop;
+</code><code id="L71"><span class="ln">71</span>                                <b>return</b> out;
+</code><code id="L72"><span class="ln">72</span>                            }
+</code><code id="L73"><span class="ln">73</span>                            <b>do</b> {
+</code><code id="L74"><span class="ln">74</span>                                z++;
+</code><code id="L75"><span class="ln">75</span>                                l<span class="s"> = </span>queue[indexed[z]];
+</code><code id="L76"><span class="ln">76</span>                                l<span class="s"> &amp;&amp; </span>out.push(l.apply(scope, args));
+</code><code id="L77"><span class="ln">77</span>                                <b>if</b> (stop) {
+</code><code id="L78"><span class="ln">78</span>                                    stop<span class="s"> = </span>oldstop;
+</code><code id="L79"><span class="ln">79</span>                                    <b>return</b> out;
+</code><code id="L80"><span class="ln">80</span>                                }
+</code><code id="L81"><span class="ln">81</span>                            } <b>while</b> (l)
+</code><code id="L82"><span class="ln">82</span>                        } <b>else</b> {
+</code><code id="L83"><span class="ln">83</span>                            queue[l.zIndex]<span class="s"> = </span>l;
+</code><code id="L84"><span class="ln">84</span>                        }
+</code><code id="L85"><span class="ln">85</span>                    } <b>else</b> {
+</code><code id="L86"><span class="ln">86</span>                        out.push(l.apply(scope, args));
+</code><code id="L87"><span class="ln">87</span>                        <b>if</b> (stop) {
+</code><code id="L88"><span class="ln">88</span>                            stop<span class="s"> = </span>oldstop;
+</code><code id="L89"><span class="ln">89</span>                            <b>return</b> out;
+</code><code id="L90"><span class="ln">90</span>                        }
+</code><code id="L91"><span class="ln">91</span>                    }
+</code><code id="L92"><span class="ln">92</span>                }
+</code><code id="L93"><span class="ln">93</span>                stop<span class="s"> = </span>oldstop;
+</code><code id="L94"><span class="ln">94</span>                <b>return</b> out.length ? out : <b>null</b>;
+</code><code id="L95"><span class="ln">95</span>            };
+</code><code id="L96"><span class="ln">96</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L97"><span class="ln">97</span><span class="c">        <span class="s"> * </span>eve.listeners
+</span></code><code id="L98"><span class="ln">98</span><span class="c">         [ method ]
+</span></code><code id="L99"><span class="ln">99</span><span class="c">         **
+</span></code><code id="L100"><span class="ln">100</span><span class="c">        <span class="s"> * </span>Internal method which gives you array of all event handlers that will be triggered by the given `name`.
+</span></code><code id="L101"><span class="ln">101</span><span class="c">         **
+</span></code><code id="L102"><span class="ln">102</span><span class="c">         > Arguments
+</span></code><code id="L103"><span class="ln">103</span><span class="c">         **
+</span></code><code id="L104"><span class="ln">104</span><span class="c">        <span class="s"> - </span>name (string) name of the event, dot (`.`) or slash (`/`) separated
+</span></code><code id="L105"><span class="ln">105</span><span class="c">         **
+</span></code><code id="L106"><span class="ln">106</span><span class="c">        <span class="s"> = </span>(array) array of event handlers
+</span></code><code id="L107"><span class="ln">107</span><span class="c">        \*/</span>
+</code><code id="L108"><span class="ln">108</span>        eve.listeners<span class="s"> = </span><b>function</b> (name) {
+</code><code id="L109"><span class="ln">109</span>            <b>var</b> names<span class="s"> = </span>name.split(separator),
+</code><code id="L110"><span class="ln">110</span>                e<span class="s"> = </span>events,
+</code><code id="L111"><span class="ln">111</span>                item,
+</code><code id="L112"><span class="ln">112</span>                items,
+</code><code id="L113"><span class="ln">113</span>                k,
+</code><code id="L114"><span class="ln">114</span>                i,
+</code><code id="L115"><span class="ln">115</span>                ii,
+</code><code id="L116"><span class="ln">116</span>                j,
+</code><code id="L117"><span class="ln">117</span>                jj,
+</code><code id="L118"><span class="ln">118</span>                nes,
+</code><code id="L119"><span class="ln">119</span>                es<span class="s"> = </span>[e],
+</code><code id="L120"><span class="ln">120</span>                out<span class="s"> = </span>[];
+</code><code id="L121"><span class="ln">121</span>            <b>for</b> (i<span class="s"> = </span><span class="d">0</span>, ii<span class="s"> = </span>names.length; i &lt; ii; i++) {
+</code><code id="L122"><span class="ln">122</span>                nes<span class="s"> = </span>[];
+</code><code id="L123"><span class="ln">123</span>                <b>for</b> (j<span class="s"> = </span><span class="d">0</span>, jj<span class="s"> = </span>es.length; j &lt; jj; j++) {
+</code><code id="L124"><span class="ln">124</span>                    e<span class="s"> = </span>es[j].n;
+</code><code id="L125"><span class="ln">125</span>                    items<span class="s"> = </span>[e[names[i]], e[wildcard]];
+</code><code id="L126"><span class="ln">126</span>                    k<span class="s"> = </span><span class="d">2</span>;
+</code><code id="L127"><span class="ln">127</span>                    <b>while</b> (k--) {
+</code><code id="L128"><span class="ln">128</span>                        item<span class="s"> = </span>items[k];
+</code><code id="L129"><span class="ln">129</span>                        <b>if</b> (item) {
+</code><code id="L130"><span class="ln">130</span>                            nes.push(item);
+</code><code id="L131"><span class="ln">131</span>                            out<span class="s"> = </span>out.concat(item.f<span class="s"> || </span>[]);
+</code><code id="L132"><span class="ln">132</span>                        }
+</code><code id="L133"><span class="ln">133</span>                    }
+</code><code id="L134"><span class="ln">134</span>                }
+</code><code id="L135"><span class="ln">135</span>                es<span class="s"> = </span>nes;
+</code><code id="L136"><span class="ln">136</span>            }
+</code><code id="L137"><span class="ln">137</span>            <b>return</b> out;
+</code><code id="L138"><span class="ln">138</span>        };
+</code><code id="L139"><span class="ln">139</span>        
+</code><code id="L140"><span class="ln">140</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L141"><span class="ln">141</span><span class="c">        <span class="s"> * </span>eve.on
+</span></code><code id="L142"><span class="ln">142</span><span class="c">         [ method ]
+</span></code><code id="L143"><span class="ln">143</span><span class="c">         **
+</span></code><code id="L144"><span class="ln">144</span><span class="c">        <span class="s"> * </span>Binds given event handler <b>with</b> a given name. You can use wildcards “`*`” <b>for</b> the names:
+</span></code><code id="L145"><span class="ln">145</span><span class="c">        <span class="s"> | </span>eve.on(<i>"*.under.*"</i>, f);
+</span></code><code id="L146"><span class="ln">146</span><span class="c">        <span class="s"> | </span>eve(<i>"mouse.under.floor"</i>); <span class="c">// triggers f</span>
+</span></code><code id="L147"><span class="ln">147</span><span class="c">        <span class="s"> * </span>Use @eve to trigger the listener.
+</span></code><code id="L148"><span class="ln">148</span><span class="c">         **
+</span></code><code id="L149"><span class="ln">149</span><span class="c">         > Arguments
+</span></code><code id="L150"><span class="ln">150</span><span class="c">         **
+</span></code><code id="L151"><span class="ln">151</span><span class="c">        <span class="s"> - </span>name (string) name of the event, dot (`.`) or slash (`/`) separated, <b>with</b> optional wildcards
+</span></code><code id="L152"><span class="ln">152</span><span class="c">        <span class="s"> - </span>f (<b>function</b>) event handler <b>function</b>
+</span></code><code id="L153"><span class="ln">153</span><span class="c">         **
+</span></code><code id="L154"><span class="ln">154</span><span class="c">        <span class="s"> = </span>(<b>function</b>) returned <b>function</b> accept one number parameter that represents z-index of the handler. It is optional feature and only used when you need to ensure that some subset of handlers will be invoked <b>in</b> a given order, despite of the order of assignment. 
+</span></code><code id="L155"><span class="ln">155</span><span class="c">         > Example:
+</span></code><code id="L156"><span class="ln">156</span><span class="c">        <span class="s"> | </span>eve.on(<i>"mouse"</i>, eat)(<span class="d">2</span>);
+</span></code><code id="L157"><span class="ln">157</span><span class="c">        <span class="s"> | </span>eve.on(<i>"mouse"</i>, scream);
+</span></code><code id="L158"><span class="ln">158</span><span class="c">        <span class="s"> | </span>eve.on(<i>"mouse"</i>, <b>catch</b>)(<span class="d">1</span>);
+</span></code><code id="L159"><span class="ln">159</span><span class="c">        <span class="s"> * </span>This will ensure that `<b>catch</b>` <b>function</b> will be called before `eat`.
+</span></code><code id="L160"><span class="ln">160</span><span class="c">        <span class="s"> * </span>If you want to put you hadler before not indexed handlers specify negative value.
+</span></code><code id="L161"><span class="ln">161</span><span class="c">        <span class="s"> * </span>Note: I assume most of the time you don’t need to worry about z-index, but it’s nice to have <b>this</b> feature “just <b>in</b> <b>case</b>”.
+</span></code><code id="L162"><span class="ln">162</span><span class="c">        \*/</span>
+</code><code id="L163"><span class="ln">163</span>        eve.on<span class="s"> = </span><b>function</b> (name, f) {
+</code><code id="L164"><span class="ln">164</span>            <b>var</b> names<span class="s"> = </span>name.split(separator),
+</code><code id="L165"><span class="ln">165</span>                e<span class="s"> = </span>events;
+</code><code id="L166"><span class="ln">166</span>            <b>for</b> (<b>var</b> i<span class="s"> = </span><span class="d">0</span>, ii<span class="s"> = </span>names.length; i &lt; ii; i++) {
+</code><code id="L167"><span class="ln">167</span>                e<span class="s"> = </span>e.n;
+</code><code id="L168"><span class="ln">168</span>                !e[names[i]]<span class="s"> &amp;&amp; </span>(e[names[i]]<span class="s"> = </span>{n: {}});
+</code><code id="L169"><span class="ln">169</span>                e<span class="s"> = </span>e[names[i]];
+</code><code id="L170"><span class="ln">170</span>            }
+</code><code id="L171"><span class="ln">171</span>            e.f<span class="s"> = </span>e.f<span class="s"> || </span>[];
+</code><code id="L172"><span class="ln">172</span>            <b>for</b> (i<span class="s"> = </span><span class="d">0</span>, ii<span class="s"> = </span>e.f.length; i &lt; ii; i++) <b>if</b> (e.f[i]<span class="s"> == </span>f) {
+</code><code id="L173"><span class="ln">173</span>                <b>return</b> fun;
+</code><code id="L174"><span class="ln">174</span>            }
+</code><code id="L175"><span class="ln">175</span>            e.f.push(f);
+</code><code id="L176"><span class="ln">176</span>            <b>return</b> <b>function</b> (zIndex) {
+</code><code id="L177"><span class="ln">177</span>                <b>if</b> (+zIndex<span class="s"> == </span>+zIndex) {
+</code><code id="L178"><span class="ln">178</span>                    f.zIndex<span class="s"> = </span>+zIndex;
+</code><code id="L179"><span class="ln">179</span>                }
+</code><code id="L180"><span class="ln">180</span>            };
+</code><code id="L181"><span class="ln">181</span>        };
+</code><code id="L182"><span class="ln">182</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L183"><span class="ln">183</span><span class="c">        <span class="s"> * </span>eve.stop
+</span></code><code id="L184"><span class="ln">184</span><span class="c">         [ method ]
+</span></code><code id="L185"><span class="ln">185</span><span class="c">         **
+</span></code><code id="L186"><span class="ln">186</span><span class="c">        <span class="s"> * </span>Is used inside event handler to stop event
+</span></code><code id="L187"><span class="ln">187</span><span class="c">        \*/</span>
+</code><code id="L188"><span class="ln">188</span>        eve.stop<span class="s"> = </span><b>function</b> () {
+</code><code id="L189"><span class="ln">189</span>            stop<span class="s"> = </span><span class="d">1</span>;
+</code><code id="L190"><span class="ln">190</span>        };
+</code><code id="L191"><span class="ln">191</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L192"><span class="ln">192</span><span class="c">        <span class="s"> * </span>eve.nt
+</span></code><code id="L193"><span class="ln">193</span><span class="c">         [ method ]
+</span></code><code id="L194"><span class="ln">194</span><span class="c">         **
+</span></code><code id="L195"><span class="ln">195</span><span class="c">        <span class="s"> * </span>Could be used inside event handler to figure out actual name of the event.
+</span></code><code id="L196"><span class="ln">196</span><span class="c">         **
+</span></code><code id="L197"><span class="ln">197</span><span class="c">         > Arguments
+</span></code><code id="L198"><span class="ln">198</span><span class="c">         **
+</span></code><code id="L199"><span class="ln">199</span><span class="c">        <span class="s"> - </span>subname (string) #optional subname of the event
+</span></code><code id="L200"><span class="ln">200</span><span class="c">         **
+</span></code><code id="L201"><span class="ln">201</span><span class="c">        <span class="s"> = </span>(string) name of the event, <b>if</b> `subname` is not specified
+</span></code><code id="L202"><span class="ln">202</span><span class="c">        <span class="s"> * </span>or
+</span></code><code id="L203"><span class="ln">203</span><span class="c">        <span class="s"> = </span>(<b>boolean</b>) `<b>true</b>`, <b>if</b> current event’s name contains `subname`
+</span></code><code id="L204"><span class="ln">204</span><span class="c">        \*/</span>
+</code><code id="L205"><span class="ln">205</span>        eve.nt<span class="s"> = </span><b>function</b> (subname) {
+</code><code id="L206"><span class="ln">206</span>            <b>if</b> (subname) {
+</code><code id="L207"><span class="ln">207</span>                <b>return</b> <b>new</b> RegExp(<i>"(?:\\.|\\/|^)"</i><span class="s"> + </span>subname<span class="s"> + </span><i>"(?:\\.|\\/|$)"</i>).test(current_event);
+</code><code id="L208"><span class="ln">208</span>            }
+</code><code id="L209"><span class="ln">209</span>            <b>return</b> current_event;
+</code><code id="L210"><span class="ln">210</span>        };
+</code><code id="L211"><span class="ln">211</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L212"><span class="ln">212</span><span class="c">        <span class="s"> * </span>eve.unbind
+</span></code><code id="L213"><span class="ln">213</span><span class="c">         [ method ]
+</span></code><code id="L214"><span class="ln">214</span><span class="c">         **
+</span></code><code id="L215"><span class="ln">215</span><span class="c">        <span class="s"> * </span>Removes given <b>function</b> from the list of event listeners assigned to given name.
+</span></code><code id="L216"><span class="ln">216</span><span class="c">         **
+</span></code><code id="L217"><span class="ln">217</span><span class="c">         > Arguments
+</span></code><code id="L218"><span class="ln">218</span><span class="c">         **
+</span></code><code id="L219"><span class="ln">219</span><span class="c">        <span class="s"> - </span>name (string) name of the event, dot (`.`) or slash (`/`) separated, <b>with</b> optional wildcards
+</span></code><code id="L220"><span class="ln">220</span><span class="c">        <span class="s"> - </span>f (<b>function</b>) event handler <b>function</b>
+</span></code><code id="L221"><span class="ln">221</span><span class="c">        \*/</span>
+</code><code id="L222"><span class="ln">222</span>        eve.unbind<span class="s"> = </span><b>function</b> (name, f) {
+</code><code id="L223"><span class="ln">223</span>            <b>var</b> names<span class="s"> = </span>name.split(separator),
+</code><code id="L224"><span class="ln">224</span>                e,
+</code><code id="L225"><span class="ln">225</span>                key,
+</code><code id="L226"><span class="ln">226</span>                splice,
+</code><code id="L227"><span class="ln">227</span>                cur<span class="s"> = </span>[events];
+</code><code id="L228"><span class="ln">228</span>            <b>for</b> (<b>var</b> i<span class="s"> = </span><span class="d">0</span>, ii<span class="s"> = </span>names.length; i &lt; ii; i++) {
+</code><code id="L229"><span class="ln">229</span>                <b>for</b> (<b>var</b> j<span class="s"> = </span><span class="d">0</span>; j &lt; cur.length; j += splice.length<span class="s"> - </span><span class="d">2</span>) {
+</code><code id="L230"><span class="ln">230</span>                    splice<span class="s"> = </span>[j, <span class="d">1</span>];
+</code><code id="L231"><span class="ln">231</span>                    e<span class="s"> = </span>cur[j].n;
+</code><code id="L232"><span class="ln">232</span>                    <b>if</b> (names[i] != wildcard) {
+</code><code id="L233"><span class="ln">233</span>                        <b>if</b> (e[names[i]]) {
+</code><code id="L234"><span class="ln">234</span>                            splice.push(e[names[i]]);
+</code><code id="L235"><span class="ln">235</span>                        }
+</code><code id="L236"><span class="ln">236</span>                    } <b>else</b> {
+</code><code id="L237"><span class="ln">237</span>                        <b>for</b> (key <b>in</b> e) <b>if</b> (e[has](key)) {
+</code><code id="L238"><span class="ln">238</span>                            splice.push(e[key]);
+</code><code id="L239"><span class="ln">239</span>                        }
+</code><code id="L240"><span class="ln">240</span>                    }
+</code><code id="L241"><span class="ln">241</span>                    cur.splice.apply(cur, splice);
+</code><code id="L242"><span class="ln">242</span>                }
+</code><code id="L243"><span class="ln">243</span>            }
+</code><code id="L244"><span class="ln">244</span>            <b>for</b> (i<span class="s"> = </span><span class="d">0</span>, ii<span class="s"> = </span>cur.length; i &lt; ii; i++) {
+</code><code id="L245"><span class="ln">245</span>                e<span class="s"> = </span>cur[i];
+</code><code id="L246"><span class="ln">246</span>                <b>while</b> (e.n) {
+</code><code id="L247"><span class="ln">247</span>                    <b>if</b> (f) {
+</code><code id="L248"><span class="ln">248</span>                        <b>if</b> (e.f) {
+</code><code id="L249"><span class="ln">249</span>                            <b>for</b> (j<span class="s"> = </span><span class="d">0</span>, jj<span class="s"> = </span>e.f.length; j &lt; jj; j++) <b>if</b> (e.f[j]<span class="s"> == </span>f) {
+</code><code id="L250"><span class="ln">250</span>                                e.f.splice(j, <span class="d">1</span>);
+</code><code id="L251"><span class="ln">251</span>                                <b>break</b>;
+</code><code id="L252"><span class="ln">252</span>                            }
+</code><code id="L253"><span class="ln">253</span>                            !e.f.length<span class="s"> &amp;&amp; </span><b>delete</b> e.f;
+</code><code id="L254"><span class="ln">254</span>                        }
+</code><code id="L255"><span class="ln">255</span>                        <b>for</b> (key <b>in</b> e.n) <b>if</b> (e.n[has](key)<span class="s"> &amp;&amp; </span>e.n[key].f) {
+</code><code id="L256"><span class="ln">256</span>                            <b>var</b> funcs<span class="s"> = </span>e.n[key].f;
+</code><code id="L257"><span class="ln">257</span>                            <b>for</b> (j<span class="s"> = </span><span class="d">0</span>, jj<span class="s"> = </span>funcs.length; j &lt; jj; j++) <b>if</b> (funcs[j]<span class="s"> == </span>f) {
+</code><code id="L258"><span class="ln">258</span>                                funcs.splice(j, <span class="d">1</span>);
+</code><code id="L259"><span class="ln">259</span>                                <b>break</b>;
+</code><code id="L260"><span class="ln">260</span>                            }
+</code><code id="L261"><span class="ln">261</span>                            !funcs.length<span class="s"> &amp;&amp; </span><b>delete</b> e.n[key].f;
+</code><code id="L262"><span class="ln">262</span>                        }
+</code><code id="L263"><span class="ln">263</span>                    } <b>else</b> {
+</code><code id="L264"><span class="ln">264</span>                        <b>delete</b> e.f;
+</code><code id="L265"><span class="ln">265</span>                        <b>for</b> (key <b>in</b> e.n) <b>if</b> (e.n[has](key)<span class="s"> &amp;&amp; </span>e.n[key].f) {
+</code><code id="L266"><span class="ln">266</span>                            <b>delete</b> e.n[key].f;
+</code><code id="L267"><span class="ln">267</span>                        }
+</code><code id="L268"><span class="ln">268</span>                    }
+</code><code id="L269"><span class="ln">269</span>                    e<span class="s"> = </span>e.n;
+</code><code id="L270"><span class="ln">270</span>                }
+</code><code id="L271"><span class="ln">271</span>            }
+</code><code id="L272"><span class="ln">272</span>        };
+</code><code id="L273"><span class="ln">273</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L274"><span class="ln">274</span><span class="c">        <span class="s"> * </span>eve.version
+</span></code><code id="L275"><span class="ln">275</span><span class="c">         [ property (string) ]
+</span></code><code id="L276"><span class="ln">276</span><span class="c">         **
+</span></code><code id="L277"><span class="ln">277</span><span class="c">        <span class="s"> * </span>Current version of the library.
+</span></code><code id="L278"><span class="ln">278</span><span class="c">        \*/</span>
+</code><code id="L279"><span class="ln">279</span>        eve.version<span class="s"> = </span>version;
+</code><code id="L280"><span class="ln">280</span>        eve.toString<span class="s"> = </span><b>function</b> () {
+</code><code id="L281"><span class="ln">281</span>            <b>return</b> <i>"You are running Eve "</i><span class="s"> + </span>version;
+</code><code id="L282"><span class="ln">282</span>        };
+</code><code id="L283"><span class="ln">283</span>        (<b>typeof</b> module != <i>"<b>undefined</b>"</i><span class="s"> &amp;&amp; </span>module.exports) ? (module.exports<span class="s"> = </span>eve) : (glob.eve<span class="s"> = </span>eve);
+</code><code id="L284"><span class="ln">284</span>    })(<b>this</b>);
+</code><code id="L285"><span class="ln">285</span>    
+</code><code id="L286"><span class="ln">286</span>    
+</code><code id="L287"><span class="ln">287</span>    <span class="c">// Interact <span class="d">0.3</span><span class="d">.0</span><span class="s"> - </span>Mouse and Touch Handling</span>
+</code><code id="L288"><span class="ln">288</span>    <span class="c">// Copyright (c) <span class="d">2010</span>-<span class="d">2011</span> Damon Oehlman (damon.oehlman -at- sidelab.com)</span>
+</code><code id="L289"><span class="ln">289</span>    <span class="c">// Licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) license</span>
+</code><code id="L290"><span class="ln">290</span>    <b>var</b> Interact<span class="s"> = </span>INTERACT<span class="s"> = </span>(<b>function</b>() {
+</code><code id="L291"><span class="ln">291</span>        <span class="c">// initialise variables</span>
+</code><code id="L292"><span class="ln">292</span>        <b>var</b> interactors<span class="s"> = </span>[],
+</code><code id="L293"><span class="ln">293</span>            reLastChunk<span class="s"> = </span>/.*\.(.*)$/,
+</code><code id="L294"><span class="ln">294</span>            lastXY<span class="s"> = </span>{};
+</code><code id="L295"><span class="ln">295</span>        
+</code><code id="L296"><span class="ln">296</span><span class="c">        <span class="c"><span class="c">/* internal functions</span> */</span></span>
+</code><code id="L297"><span class="ln">297</span>        
+</code><code id="L298"><span class="ln">298</span>        <b>function</b> genBinder(target) {
+</code><code id="L299"><span class="ln">299</span>            <b>return</b> <b>function</b>(evtName, callback) {
+</code><code id="L300"><span class="ln">300</span>                target.addEventListener(evtName, callback, <b>false</b>);
+</code><code id="L301"><span class="ln">301</span>            };
+</code><code id="L302"><span class="ln">302</span>        } <span class="c">// bindDoc</span>
+</code><code id="L303"><span class="ln">303</span>    
+</code><code id="L304"><span class="ln">304</span>        <b>function</b> genUnbinder(target) {
+</code><code id="L305"><span class="ln">305</span>            <b>return</b> <b>function</b>(evtName, callback, customTarget) {
+</code><code id="L306"><span class="ln">306</span>                target.removeEventListener(evtName, callback, <b>false</b>);
+</code><code id="L307"><span class="ln">307</span>            };
+</code><code id="L308"><span class="ln">308</span>        } <span class="c">// unbindDoc</span>
+</code><code id="L309"><span class="ln">309</span>        
+</code><code id="L310"><span class="ln">310</span>        <b>function</b> genIEBinder(target) {
+</code><code id="L311"><span class="ln">311</span>            <b>return</b> <b>function</b>(evtName, callback) {
+</code><code id="L312"><span class="ln">312</span>                target.attachEvent(<i>'on'</i><span class="s"> + </span>evtName, callback);
+</code><code id="L313"><span class="ln">313</span>            };
+</code><code id="L314"><span class="ln">314</span>        } <span class="c">// genIEBinder</span>
+</code><code id="L315"><span class="ln">315</span>        
+</code><code id="L316"><span class="ln">316</span>        <b>function</b> genIEUnbinder(target) {
+</code><code id="L317"><span class="ln">317</span>            <b>return</b> <b>function</b>(evtName, callback) {
+</code><code id="L318"><span class="ln">318</span>                target.detachEvent(<i>'on'</i><span class="s"> + </span>evtName, callback);
+</code><code id="L319"><span class="ln">319</span>            };
+</code><code id="L320"><span class="ln">320</span>        } <span class="c">// genIEUnbinder</span>
+</code><code id="L321"><span class="ln">321</span>    
+</code><code id="L322"><span class="ln">322</span>        <b>function</b> getHandlers(types, capabilities) {
+</code><code id="L323"><span class="ln">323</span>            <b>var</b> handlers<span class="s"> = </span>[];
+</code><code id="L324"><span class="ln">324</span>            
+</code><code id="L325"><span class="ln">325</span>            <span class="c">// iterate through the interactors <b>in</b> the registry</span>
+</code><code id="L326"><span class="ln">326</span>            <b>for</b> (<b>var</b> ii<span class="s"> = </span>interactors.length; ii--; ) {
+</code><code id="L327"><span class="ln">327</span>                <b>var</b> interactor<span class="s"> = </span>interactors[ii],
+</code><code id="L328"><span class="ln">328</span>                    selected<span class="s"> = </span>(! types)<span class="s"> || </span>(types.indexOf(interactor.type) >= <span class="d">0</span>),
+</code><code id="L329"><span class="ln">329</span>                    checksPass<span class="s"> = </span><b>true</b>;
+</code><code id="L330"><span class="ln">330</span>                    
+</code><code id="L331"><span class="ln">331</span>                <span class="c">// TODO: perform capabilities check</span>
+</code><code id="L332"><span class="ln">332</span>                <b>for</b> (<b>var</b> checkKey <b>in</b> interactor.checks) {
+</code><code id="L333"><span class="ln">333</span>                    <b>var</b> check<span class="s"> = </span>interactor.checks[checkKey];
+</code><code id="L334"><span class="ln">334</span>                    <span class="c">// _log(<i>'checking '</i><span class="s"> + </span>checkKey<span class="s"> + </span><i>' capability. require: '</i><span class="s"> + </span>check<span class="s"> + </span><i>', capability<span class="s"> = </span>'</i><span class="s"> + </span>capabilities[checkKey]);</span>
+</code><code id="L335"><span class="ln">335</span>                    
+</code><code id="L336"><span class="ln">336</span>                    checksPass<span class="s"> = </span>checksPass<span class="s"> &amp;&amp; </span>(check<span class="s"> === </span>capabilities[checkKey]);
+</code><code id="L337"><span class="ln">337</span>                } <span class="c">// <b>for</b></span>
+</code><code id="L338"><span class="ln">338</span>                
+</code><code id="L339"><span class="ln">339</span>                <b>if</b> (selected<span class="s"> &amp;&amp; </span>checksPass) {
+</code><code id="L340"><span class="ln">340</span>                    handlers[handlers.length]<span class="s"> = </span>interactor.handler;
+</code><code id="L341"><span class="ln">341</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L342"><span class="ln">342</span>            } <span class="c">// <b>for</b></span>
+</code><code id="L343"><span class="ln">343</span>            
+</code><code id="L344"><span class="ln">344</span>            <b>return</b> handlers;
+</code><code id="L345"><span class="ln">345</span>        } <span class="c">// getHandlers</span>
+</code><code id="L346"><span class="ln">346</span>    
+</code><code id="L347"><span class="ln">347</span>        <b>function</b> point(x, y) {
+</code><code id="L348"><span class="ln">348</span>            <b>return</b> {
+</code><code id="L349"><span class="ln">349</span>                x: x ? x : <span class="d">0</span>,
+</code><code id="L350"><span class="ln">350</span>                y: y ? y : <span class="d">0</span>,
+</code><code id="L351"><span class="ln">351</span>                count: <span class="d">1</span>
+</code><code id="L352"><span class="ln">352</span>            };
+</code><code id="L353"><span class="ln">353</span>        } <span class="c">// point</span>
+</code><code id="L354"><span class="ln">354</span>        
+</code><code id="L355"><span class="ln">355</span><span class="c">        <span class="c"><span class="c">/* exports</span> */</span></span>
+</code><code id="L356"><span class="ln">356</span>        
+</code><code id="L357"><span class="ln">357</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L358"><span class="ln">358</span><span class="c">        <span class="s"> * </span>Interact.register
+</span></code><code id="L359"><span class="ln">359</span><span class="c">         [ <b>function</b> ]
+</span></code><code id="L360"><span class="ln">360</span><span class="c">         **
+</span></code><code id="L361"><span class="ln">361</span><span class="c">        <span class="s"> * </span>Register an interaction handler
+</span></code><code id="L362"><span class="ln">362</span><span class="c">         **
+</span></code><code id="L363"><span class="ln">363</span><span class="c">         > Arguments
+</span></code><code id="L364"><span class="ln">364</span><span class="c">         **
+</span></code><code id="L365"><span class="ln">365</span><span class="c">        <span class="s"> - </span>typeName (string) the name of the interaction handler being registered
+</span></code><code id="L366"><span class="ln">366</span><span class="c">        <span class="s"> - </span>opts (object) an object containing options <b>for</b> the <b>new</b> interactor
+</span></code><code id="L367"><span class="ln">367</span><span class="c">        \*/</span>
+</code><code id="L368"><span class="ln">368</span>        <b>function</b> register(typeName, opts) {
+</code><code id="L369"><span class="ln">369</span>            <span class="c">// initialise options</span>
+</code><code id="L370"><span class="ln">370</span>            opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L371"><span class="ln">371</span>            opts.checks<span class="s"> = </span>opts.checks<span class="s"> || </span>{};
+</code><code id="L372"><span class="ln">372</span>            opts.type<span class="s"> = </span>opts.type<span class="s"> || </span>typeName;
+</code><code id="L373"><span class="ln">373</span>            
+</code><code id="L374"><span class="ln">374</span>            interactors.push(opts);
+</code><code id="L375"><span class="ln">375</span>        } <span class="c">// register</span>
+</code><code id="L376"><span class="ln">376</span>        
+</code><code id="L377"><span class="ln">377</span><span class="c">        <span class="c">/*\</span>
+</span></code><code id="L378"><span class="ln">378</span><span class="c">        <span class="s"> * </span>Interact.watch
+</span></code><code id="L379"><span class="ln">379</span><span class="c">         [ <b>function</b> ]
+</span></code><code id="L380"><span class="ln">380</span><span class="c">         **
+</span></code><code id="L381"><span class="ln">381</span><span class="c">        <span class="s"> * </span>Watch a particular DOM element <b>for</b> interaction events
+</span></code><code id="L382"><span class="ln">382</span><span class="c">         **
+</span></code><code id="L383"><span class="ln">383</span><span class="c">         > Arguments
+</span></code><code id="L384"><span class="ln">384</span><span class="c">         **
+</span></code><code id="L385"><span class="ln">385</span><span class="c">        <span class="s"> - </span>target (DOMElement) the element <b>in</b> the DOM to monitor <b>for</b> events
+</span></code><code id="L386"><span class="ln">386</span><span class="c">        <span class="s"> - </span>opts (object) any specific capture options
+</span></code><code id="L387"><span class="ln">387</span><span class="c">        <span class="s"> - </span>caps (object) device capability overrides
+</span></code><code id="L388"><span class="ln">388</span><span class="c">        \*/</span>
+</code><code id="L389"><span class="ln">389</span>        <b>function</b> watch(target, opts, caps) {
+</code><code id="L390"><span class="ln">390</span>            <b>var</b> handlers;
+</code><code id="L391"><span class="ln">391</span>            
+</code><code id="L392"><span class="ln">392</span>            <span class="c">// <b>if</b> the target is a string, then look <b>for</b> the element</span>
+</code><code id="L393"><span class="ln">393</span>            <b>if</b> (<b>typeof</b> target<span class="s"> == </span><i>'string'</i>) {
+</code><code id="L394"><span class="ln">394</span>                target<span class="s"> = </span>document.getElementById(target);
+</code><code id="L395"><span class="ln">395</span>            } <span class="c">// <b>if</b></span>
+</code><code id="L396"><span class="ln">396</span>            
+</code><code id="L397"><span class="ln">397</span>            <span class="c">// initialise options</span>
+</code><code id="L398"><span class="ln">398</span>            opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L399"><span class="ln">399</span>            opts.isIE<span class="s"> = </span><b>typeof</b> window.attachEvent != <i>'<b>undefined</b>'</i>;
+</code><code id="L400"><span class="ln">400</span>            
+</code><code id="L401"><span class="ln">401</span>            <span class="c">// init caps</span>
+</code><code id="L402"><span class="ln">402</span>            caps<span class="s"> = </span>caps<span class="s"> || </span>{};
+</code><code id="L403"><span class="ln">403</span>            caps.touch<span class="s"> = </span>caps.touch<span class="s"> || </span><i>'ontouchstart'</i> <b>in</b> window;
+</code><code id="L404"><span class="ln">404</span>            
+</code><code id="L405"><span class="ln">405</span>            <span class="c">// initialise the binder and unbinder</span>
+</code><code id="L406"><span class="ln">406</span>            opts.binder<span class="s"> = </span>(opts.isIE ? genIEBinder : genBinder)(opts.bindTarget<span class="s"> || </span>document);
+</code><code id="L407"><span class="ln">407</span>            opts.unbinder<span class="s"> = </span>(opts.isIE ? genIEBinder : genUnbinder)(opts.bindTarget<span class="s"> || </span>document);
+</code><code id="L408"><span class="ln">408</span>            
+</code><code id="L409"><span class="ln">409</span>            <span class="c">// initialise the handlers</span>
+</code><code id="L410"><span class="ln">410</span>            handlers<span class="s"> = </span>getHandlers(opts.types, caps);
+</code><code id="L411"><span class="ln">411</span>            
+</code><code id="L412"><span class="ln">412</span>            <b>for</b> (<b>var</b> ii<span class="s"> = </span><span class="d">0</span>; ii &lt; handlers.length; ii++) {
+</code><code id="L413"><span class="ln">413</span>                handlers[ii].call(target, target, opts);
+</code><code id="L414"><span class="ln">414</span>            } <span class="c">// <b>for</b></span>
+</code><code id="L415"><span class="ln">415</span>        } <span class="c">// watch</span>
+</code><code id="L416"><span class="ln">416</span>        
+</code><code id="L417"><span class="ln">417</span><span class="c">        <span class="c"><span class="c">/* common pointer (mouse, touch, etc) functions</span> */</span></span>
+</code><code id="L418"><span class="ln">418</span>        
+</code><code id="L419"><span class="ln">419</span>        <b>function</b> getOffset(obj) {
+</code><code id="L420"><span class="ln">420</span>            <b>var</b> calcLeft<span class="s"> = </span><span class="d">0</span>, 
+</code><code id="L421"><span class="ln">421</span>                calcTop<span class="s"> = </span><span class="d">0</span>;
+</code><code id="L422"><span class="ln">422</span>        
+</code><code id="L423"><span class="ln">423</span>            <b>if</b> (obj.offsetParent) {
+</code><code id="L424"><span class="ln">424</span>                <b>do</b> {
+</code><code id="L425"><span class="ln">425</span>                    calcLeft += obj.offsetLeft;
+</code><code id="L426"><span class="ln">426</span>                    calcTop += obj.offsetTop;
+</code><code id="L427"><span class="ln">427</span>        
+</code><code id="L428"><span class="ln">428</span>                    obj<span class="s"> = </span>obj.offsetParent;
+</code><code id="L429"><span class="ln">429</span>                } <b>while</b> (obj);
+</code><code id="L430"><span class="ln">430</span>            } <span class="c">// <b>if</b></span>
+</code><code id="L431"><span class="ln">431</span>        
+</code><code id="L432"><span class="ln">432</span>            <b>return</b> {
+</code><code id="L433"><span class="ln">433</span>                left: calcLeft,
+</code><code id="L434"><span class="ln">434</span>                top: calcTop
+</code><code id="L435"><span class="ln">435</span>            };
+</code><code id="L436"><span class="ln">436</span>        } <span class="c">// getOffset</span>
+</code><code id="L437"><span class="ln">437</span>        
+</code><code id="L438"><span class="ln">438</span>        <b>function</b> matchTarget(evt, targetElement) {
+</code><code id="L439"><span class="ln">439</span>            <b>var</b> targ<span class="s"> = </span>evt.target ? evt.target : evt.srcElement,
+</code><code id="L440"><span class="ln">440</span>                targClass<span class="s"> = </span>targ.className;
+</code><code id="L441"><span class="ln">441</span>            
+</code><code id="L442"><span class="ln">442</span>            <span class="c">// <b>while</b> we have a target, and that target is not the target element <b>continue</b></span>
+</code><code id="L443"><span class="ln">443</span>            <span class="c">// additionally, <b>if</b> we hit an element that has an interactor bound to it (will have the <b>class</b> interactor)</span>
+</code><code id="L444"><span class="ln">444</span>            <span class="c">// then also stop</span>
+</code><code id="L445"><span class="ln">445</span>            <b>while</b> (targ<span class="s"> &amp;&amp; </span>(targ !== targetElement)) {
+</code><code id="L446"><span class="ln">446</span>                targ<span class="s"> = </span>targ.parentNode;
+</code><code id="L447"><span class="ln">447</span>            } <span class="c">// <b>while</b></span>
+</code><code id="L448"><span class="ln">448</span>            
+</code><code id="L449"><span class="ln">449</span>            <b>return</b> targ<span class="s"> &amp;&amp; </span>(targ<span class="s"> === </span>targetElement);
+</code><code id="L450"><span class="ln">450</span>        } <span class="c">// matchTarget</span>
+</code><code id="L451"><span class="ln">451</span>        
+</code><code id="L452"><span class="ln">452</span>        <b>function</b> pointerOffset(absPoint, offset) {
+</code><code id="L453"><span class="ln">453</span>            <b>return</b> {
+</code><code id="L454"><span class="ln">454</span>                x: absPoint.x<span class="s"> - </span>(offset ? offset.left : <span class="d">0</span>),
+</code><code id="L455"><span class="ln">455</span>                y: absPoint.y<span class="s"> - </span>(offset ? offset.top : <span class="d">0</span>)
+</code><code id="L456"><span class="ln">456</span>            };    
+</code><code id="L457"><span class="ln">457</span>        } <span class="c">// triggerPositionEvent</span>
+</code><code id="L458"><span class="ln">458</span>        
+</code><code id="L459"><span class="ln">459</span>        <b>function</b> preventDefault(evt, immediate) {
+</code><code id="L460"><span class="ln">460</span>            <b>if</b> (evt.preventDefault) {
+</code><code id="L461"><span class="ln">461</span>                evt.preventDefault();
+</code><code id="L462"><span class="ln">462</span>                evt.stopPropagation();
+</code><code id="L463"><span class="ln">463</span>            }
+</code><code id="L464"><span class="ln">464</span>            <b>else</b> <b>if</b> (<b>typeof</b> evt.cancelBubble != <i>'<b>undefined</b>'</i>) {
+</code><code id="L465"><span class="ln">465</span>                evt.cancelBubble<span class="s"> = </span><b>true</b>;
+</code><code id="L466"><span class="ln">466</span>            } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L467"><span class="ln">467</span>            
+</code><code id="L468"><span class="ln">468</span>            <b>if</b> (immediate<span class="s"> &amp;&amp; </span>evt.stopImmediatePropagation) {
+</code><code id="L469"><span class="ln">469</span>                evt.stopImmediatePropagation();
+</code><code id="L470"><span class="ln">470</span>            } <span class="c">// <b>if</b></span>
+</code><code id="L471"><span class="ln">471</span>        } <span class="c">// preventDefault</span>
+</code><code id="L472"><span class="ln">472</span>    
+</code><code id="L473"><span class="ln">473</span>        <b>var</b> MouseHandler<span class="s"> = </span><b>function</b>(targetElement, opts) {
+</code><code id="L474"><span class="ln">474</span>            <span class="c">// initialise opts</span>
+</code><code id="L475"><span class="ln">475</span>            opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L476"><span class="ln">476</span>            
+</code><code id="L477"><span class="ln">477</span>            <span class="c">// initialise constants</span>
+</code><code id="L478"><span class="ln">478</span>            <b>var</b> WHEEL_DELTA_STEP<span class="s"> = </span><span class="d">120</span>,
+</code><code id="L479"><span class="ln">479</span>                WHEEL_DELTA_LEVEL<span class="s"> = </span>WHEEL_DELTA_STEP<span class="s"> * </span><span class="d">8</span>;
+</code><code id="L480"><span class="ln">480</span>            
+</code><code id="L481"><span class="ln">481</span>            <span class="c">// initialise variables</span>
+</code><code id="L482"><span class="ln">482</span>            <b>var</b> aggressiveCapture<span class="s"> = </span>opts.aggressiveCapture,
+</code><code id="L483"><span class="ln">483</span>                ignoreButton<span class="s"> = </span>opts.isIE,
+</code><code id="L484"><span class="ln">484</span>                isFlashCanvas<span class="s"> = </span><b>typeof</b> FlashCanvas != <i>'<b>undefined</b>'</i>,
+</code><code id="L485"><span class="ln">485</span>                buttonDown<span class="s"> = </span><b>false</b>,
+</code><code id="L486"><span class="ln">486</span>                start,
+</code><code id="L487"><span class="ln">487</span>                currentX,
+</code><code id="L488"><span class="ln">488</span>                currentY,
+</code><code id="L489"><span class="ln">489</span>                evtPointer<span class="s"> = </span><i>'interact.pointer'</i>,
+</code><code id="L490"><span class="ln">490</span>                evtTargetId<span class="s"> = </span>targetElement<span class="s"> &amp;&amp; </span>targetElement.id ? <i>'.'</i><span class="s"> + </span>targetElement.id : <i>''</i>,
+</code><code id="L491"><span class="ln">491</span>                evtPointerDown<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.down'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L492"><span class="ln">492</span>                evtPointerMove<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.move'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L493"><span class="ln">493</span>                evtPointerUp<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.up'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L494"><span class="ln">494</span>                evtZoomWheel<span class="s"> = </span><i>'interact.zoom.wheel'</i><span class="s"> + </span>evtTargetId;
+</code><code id="L495"><span class="ln">495</span>            
+</code><code id="L496"><span class="ln">496</span><span class="c">            <span class="c"><span class="c">/* internal functions</span> */</span></span>
+</code><code id="L497"><span class="ln">497</span>            
+</code><code id="L498"><span class="ln">498</span>            <b>function</b> getPagePos(evt) {
+</code><code id="L499"><span class="ln">499</span>                <b>if</b> (evt.pageX<span class="s"> &amp;&amp; </span>evt.pageY) {
+</code><code id="L500"><span class="ln">500</span>                    <b>return</b> point(evt.pageX, evt.pageY);
+</code><code id="L501"><span class="ln">501</span>                }
+</code><code id="L502"><span class="ln">502</span>                <b>else</b> {
+</code><code id="L503"><span class="ln">503</span>                    <b>var</b> doc<span class="s"> = </span>document.documentElement,
+</code><code id="L504"><span class="ln">504</span>            			body<span class="s"> = </span>document.body;
+</code><code id="L505"><span class="ln">505</span>        
+</code><code id="L506"><span class="ln">506</span>                    <span class="c">// code from jquery event handling:</span>
+</code><code id="L507"><span class="ln">507</span>                    <span class="c">// https://github.com/jquery/jquery/blob/<span class="d">1.5</span><span class="d">.1</span>/src/event.js#L493</span>
+</code><code id="L508"><span class="ln">508</span>                    <b>return</b> point(
+</code><code id="L509"><span class="ln">509</span>                        evt.clientX<span class="s"> + </span>
+</code><code id="L510"><span class="ln">510</span>                            (doc<span class="s"> &amp;&amp; </span>doc.scrollLeft<span class="s"> || </span>body<span class="s"> &amp;&amp; </span>body.scrollLeft<span class="s"> || </span><span class="d">0</span>)<span class="s"> - </span>
+</code><code id="L511"><span class="ln">511</span>                            (doc<span class="s"> &amp;&amp; </span>doc.clientLeft<span class="s"> || </span>body<span class="s"> &amp;&amp; </span>body.clientLeft<span class="s"> || </span><span class="d">0</span>),
+</code><code id="L512"><span class="ln">512</span>                        evt.clientY<span class="s"> + </span>
+</code><code id="L513"><span class="ln">513</span>                            (doc<span class="s"> &amp;&amp; </span>doc.scrollTop <span class="s"> || </span>body<span class="s"> &amp;&amp; </span>body.scrollTop <span class="s"> || </span><span class="d">0</span>)<span class="s"> - </span>
+</code><code id="L514"><span class="ln">514</span>                            (doc<span class="s"> &amp;&amp; </span>doc.clientTop <span class="s"> || </span>body<span class="s"> &amp;&amp; </span>body.clientTop <span class="s"> || </span><span class="d">0</span>)
+</code><code id="L515"><span class="ln">515</span>                    );
+</code><code id="L516"><span class="ln">516</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L517"><span class="ln">517</span>            } <span class="c">// getPagePos</span>
+</code><code id="L518"><span class="ln">518</span>            
+</code><code id="L519"><span class="ln">519</span>            <b>function</b> handleDoubleClick(evt) {
+</code><code id="L520"><span class="ln">520</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L521"><span class="ln">521</span>                    <b>var</b> clickXY<span class="s"> = </span>getPagePos(evt);
+</code><code id="L522"><span class="ln">522</span>                    
+</code><code id="L523"><span class="ln">523</span>                    eve(
+</code><code id="L524"><span class="ln">524</span>                        <i>'interact.doubletap'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L525"><span class="ln">525</span>                        targetElement,
+</code><code id="L526"><span class="ln">526</span>                        evt,
+</code><code id="L527"><span class="ln">527</span>                        clickXY, 
+</code><code id="L528"><span class="ln">528</span>                        pointerOffset(clickXY, getOffset(targetElement))
+</code><code id="L529"><span class="ln">529</span>                    );
+</code><code id="L530"><span class="ln">530</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L531"><span class="ln">531</span>            } <span class="c">// handleDoubleClick    </span>
+</code><code id="L532"><span class="ln">532</span>            
+</code><code id="L533"><span class="ln">533</span>            <b>function</b> handleMouseDown(evt) {
+</code><code id="L534"><span class="ln">534</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L535"><span class="ln">535</span>                    buttonDown<span class="s"> = </span>isLeftButton(evt);
+</code><code id="L536"><span class="ln">536</span>                    <b>if</b> (aggressiveCapture) {
+</code><code id="L537"><span class="ln">537</span>                        preventDefault(evt, <b>true</b>);
+</code><code id="L538"><span class="ln">538</span>                    }
+</code><code id="L539"><span class="ln">539</span>                    
+</code><code id="L540"><span class="ln">540</span>                    <b>if</b> (buttonDown) {
+</code><code id="L541"><span class="ln">541</span>                        <b>var</b> pagePos<span class="s"> = </span>getPagePos(evt);
+</code><code id="L542"><span class="ln">542</span>                        
+</code><code id="L543"><span class="ln">543</span>                        <span class="c">// update the cursor and prevent the <b>default</b></span>
+</code><code id="L544"><span class="ln">544</span>                        targetElement.style.cursor<span class="s"> = </span><i>'move'</i>;
+</code><code id="L545"><span class="ln">545</span>                        start<span class="s"> = </span>point(pagePos.x, pagePos.y);
+</code><code id="L546"><span class="ln">546</span>                        
+</code><code id="L547"><span class="ln">547</span>                        <span class="c">// trigger the pointer down event</span>
+</code><code id="L548"><span class="ln">548</span>                        eve(
+</code><code id="L549"><span class="ln">549</span>                            evtPointerDown, 
+</code><code id="L550"><span class="ln">550</span>                            targetElement,
+</code><code id="L551"><span class="ln">551</span>                            evt,
+</code><code id="L552"><span class="ln">552</span>                            start, 
+</code><code id="L553"><span class="ln">553</span>                            pointerOffset(start, getOffset(targetElement))
+</code><code id="L554"><span class="ln">554</span>                        );
+</code><code id="L555"><span class="ln">555</span>                    }
+</code><code id="L556"><span class="ln">556</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L557"><span class="ln">557</span>            } <span class="c">// mouseDown</span>
+</code><code id="L558"><span class="ln">558</span>            
+</code><code id="L559"><span class="ln">559</span>            <b>function</b> handleMouseMove(evt) {
+</code><code id="L560"><span class="ln">560</span>                <b>var</b> pagePos<span class="s"> = </span>getPagePos(evt);
+</code><code id="L561"><span class="ln">561</span>        
+</code><code id="L562"><span class="ln">562</span>                <span class="c">// capture the current x and current y</span>
+</code><code id="L563"><span class="ln">563</span>                currentX<span class="s"> = </span>pagePos.x;
+</code><code id="L564"><span class="ln">564</span>                currentY<span class="s"> = </span>pagePos.y;
+</code><code id="L565"><span class="ln">565</span>                
+</code><code id="L566"><span class="ln">566</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L567"><span class="ln">567</span>                    triggerCurrent(evt, <i>'interact.pointer.'</i>+ (buttonDown ? <i>'move'</i> : <i>'hover'</i>));
+</code><code id="L568"><span class="ln">568</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L569"><span class="ln">569</span>            } <span class="c">// mouseMove</span>
+</code><code id="L570"><span class="ln">570</span>        
+</code><code id="L571"><span class="ln">571</span>            <b>function</b> handleMouseUp(evt) {
+</code><code id="L572"><span class="ln">572</span>                <b>if</b> (buttonDown<span class="s"> &amp;&amp; </span>isLeftButton(evt)) {
+</code><code id="L573"><span class="ln">573</span>                    buttonDown<span class="s"> = </span><b>false</b>;
+</code><code id="L574"><span class="ln">574</span>                    
+</code><code id="L575"><span class="ln">575</span>                    <span class="c">// <b>if</b> the button was released on <b>this</b> element, then trigger the event</span>
+</code><code id="L576"><span class="ln">576</span>                    <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L577"><span class="ln">577</span>                        targetElement.style.cursor<span class="s"> = </span><i>'<b>default</b>'</i>;
+</code><code id="L578"><span class="ln">578</span>                        triggerCurrent(evt, <i>'interact.pointer.up'</i>);
+</code><code id="L579"><span class="ln">579</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L580"><span class="ln">580</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L581"><span class="ln">581</span>            } <span class="c">// mouseUp</span>
+</code><code id="L582"><span class="ln">582</span>            
+</code><code id="L583"><span class="ln">583</span>            <b>function</b> handleWheel(evt) {
+</code><code id="L584"><span class="ln">584</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L585"><span class="ln">585</span>                    <b>var</b> deltaY;
+</code><code id="L586"><span class="ln">586</span>                    
+</code><code id="L587"><span class="ln">587</span>                    <span class="c">// handle IE behaviour</span>
+</code><code id="L588"><span class="ln">588</span>                    evt<span class="s"> = </span>evt<span class="s"> || </span>window.event;
+</code><code id="L589"><span class="ln">589</span>                    
+</code><code id="L590"><span class="ln">590</span>                    <b>if</b> (evt.detail) {
+</code><code id="L591"><span class="ln">591</span>                        <b>if</b> (<b>typeof</b> evt.axis<span class="s"> == </span><i>'<b>undefined</b>'</i><span class="s"> || </span>evt.axis<span class="s"> === </span><span class="d">2</span>) {
+</code><code id="L592"><span class="ln">592</span>                            deltaY<span class="s"> = </span>-evt.detail<span class="s"> * </span>WHEEL_DELTA_STEP;
+</code><code id="L593"><span class="ln">593</span>                        } <span class="c">// <b>if</b></span>
+</code><code id="L594"><span class="ln">594</span>                    }
+</code><code id="L595"><span class="ln">595</span>                    <b>else</b> {
+</code><code id="L596"><span class="ln">596</span>                        deltaY<span class="s"> = </span>evt.wheelDeltaY ? evt.wheelDeltaY : evt.wheelDelta;
+</code><code id="L597"><span class="ln">597</span>                        <b>if</b> (window.opera) {
+</code><code id="L598"><span class="ln">598</span>                            deltaY<span class="s"> = </span>-deltaY;
+</code><code id="L599"><span class="ln">599</span>                        } <span class="c">// <b>if</b></span>
+</code><code id="L600"><span class="ln">600</span>                    } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L601"><span class="ln">601</span>                    
+</code><code id="L602"><span class="ln">602</span>                    <b>if</b> (deltaY) {
+</code><code id="L603"><span class="ln">603</span>                        <b>var</b> current<span class="s"> = </span>point(currentX, currentY);
+</code><code id="L604"><span class="ln">604</span>                        
+</code><code id="L605"><span class="ln">605</span>                        eve(
+</code><code id="L606"><span class="ln">606</span>                            evtZoomWheel,
+</code><code id="L607"><span class="ln">607</span>                            targetElement,
+</code><code id="L608"><span class="ln">608</span>                            evt,
+</code><code id="L609"><span class="ln">609</span>                            current, 
+</code><code id="L610"><span class="ln">610</span>                            pointerOffset(current, getOffset(targetElement)),
+</code><code id="L611"><span class="ln">611</span>                            deltaY<span class="s"> / </span>WHEEL_DELTA_LEVEL
+</code><code id="L612"><span class="ln">612</span>                        );
+</code><code id="L613"><span class="ln">613</span>                        
+</code><code id="L614"><span class="ln">614</span>                        <b>if</b> (aggressiveCapture) {
+</code><code id="L615"><span class="ln">615</span>                            preventDefault(evt, <b>true</b>);
+</code><code id="L616"><span class="ln">616</span>                        }
+</code><code id="L617"><span class="ln">617</span>        
+</code><code id="L618"><span class="ln">618</span>                        evt.returnValue<span class="s"> = </span><b>false</b>;
+</code><code id="L619"><span class="ln">619</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L620"><span class="ln">620</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L621"><span class="ln">621</span>            } <span class="c">// handleWheel</span>
+</code><code id="L622"><span class="ln">622</span>            
+</code><code id="L623"><span class="ln">623</span>            <b>function</b> isLeftButton(evt) {
+</code><code id="L624"><span class="ln">624</span>                evt<span class="s"> = </span>evt<span class="s"> || </span>window.event;
+</code><code id="L625"><span class="ln">625</span>                <b>var</b> button<span class="s"> = </span>evt.which<span class="s"> || </span>evt.button;
+</code><code id="L626"><span class="ln">626</span>                <b>return</b> button<span class="s"> == </span><span class="d">1</span>;
+</code><code id="L627"><span class="ln">627</span>            } <span class="c">// leftPressed</span>
+</code><code id="L628"><span class="ln">628</span>            
+</code><code id="L629"><span class="ln">629</span>            <b>function</b> preventDrag(evt) {
+</code><code id="L630"><span class="ln">630</span>                <b>return</b> !matchTarget(evt, targetElement);
+</code><code id="L631"><span class="ln">631</span>            } <span class="c">// preventDrag</span>
+</code><code id="L632"><span class="ln">632</span>            
+</code><code id="L633"><span class="ln">633</span>            <b>function</b> triggerCurrent(evt, eventName, overrideX, overrideY, updateLast) {
+</code><code id="L634"><span class="ln">634</span>                <b>var</b> evtX<span class="s"> = </span><b>typeof</b> overrideX != <i>'<b>undefined</b>'</i> ? overrideX : currentX,
+</code><code id="L635"><span class="ln">635</span>                    evtY<span class="s"> = </span><b>typeof</b> overrideY != <i>'<b>undefined</b>'</i> ? overrideY : currentY,
+</code><code id="L636"><span class="ln">636</span>                    current<span class="s"> = </span>point(evtX, evtY);
+</code><code id="L637"><span class="ln">637</span>                    
+</code><code id="L638"><span class="ln">638</span>                <b>if</b> (aggressiveCapture) {
+</code><code id="L639"><span class="ln">639</span>                    preventDefault(evt, <b>true</b>);
+</code><code id="L640"><span class="ln">640</span>                }
+</code><code id="L641"><span class="ln">641</span>                
+</code><code id="L642"><span class="ln">642</span>                <span class="c">// trigger the event</span>
+</code><code id="L643"><span class="ln">643</span>                eve(
+</code><code id="L644"><span class="ln">644</span>                    eventName<span class="s"> + </span>evtTargetId,
+</code><code id="L645"><span class="ln">645</span>                    targetElement,
+</code><code id="L646"><span class="ln">646</span>                    evt,
+</code><code id="L647"><span class="ln">647</span>                    current,
+</code><code id="L648"><span class="ln">648</span>                    pointerOffset(current, getOffset(targetElement))
+</code><code id="L649"><span class="ln">649</span>                );
+</code><code id="L650"><span class="ln">650</span>            } <span class="c">// triggerCurrent</span>
+</code><code id="L651"><span class="ln">651</span>        
+</code><code id="L652"><span class="ln">652</span><span class="c">            <span class="c"><span class="c">/* exports</span> */</span></span>
+</code><code id="L653"><span class="ln">653</span>            
+</code><code id="L654"><span class="ln">654</span>            <b>function</b> unbind() {
+</code><code id="L655"><span class="ln">655</span>                <span class="c">// wire up the event handlers</span>
+</code><code id="L656"><span class="ln">656</span>                opts.unbinder(<i>'mousedown'</i>, handleMouseDown);
+</code><code id="L657"><span class="ln">657</span>                opts.unbinder(<i>'mousemove'</i>, handleMouseMove);
+</code><code id="L658"><span class="ln">658</span>                opts.unbinder(<i>'mouseup'</i>, handleMouseUp);
+</code><code id="L659"><span class="ln">659</span>        
+</code><code id="L660"><span class="ln">660</span>                <span class="c">// bind mouse wheel events</span>
+</code><code id="L661"><span class="ln">661</span>                opts.unbinder(<i>"mousewheel"</i>, handleWheel);
+</code><code id="L662"><span class="ln">662</span>                opts.unbinder(<i>"DOMMouseScroll"</i>, handleWheel);
+</code><code id="L663"><span class="ln">663</span>            } <span class="c">// unbind</span>
+</code><code id="L664"><span class="ln">664</span>            
+</code><code id="L665"><span class="ln">665</span>            <span class="c">// wire up the event handlers</span>
+</code><code id="L666"><span class="ln">666</span>            opts.binder(<i>'mousedown'</i>, handleMouseDown);
+</code><code id="L667"><span class="ln">667</span>            opts.binder(<i>'mousemove'</i>, handleMouseMove);
+</code><code id="L668"><span class="ln">668</span>            opts.binder(<i>'mouseup'</i>, handleMouseUp);
+</code><code id="L669"><span class="ln">669</span>            opts.binder(<i>'dblclick'</i>, handleDoubleClick);
+</code><code id="L670"><span class="ln">670</span>            
+</code><code id="L671"><span class="ln">671</span>            <span class="c">// handle drag start and select start events to ensure moves work on ie</span>
+</code><code id="L672"><span class="ln">672</span>            opts.binder(<i>'selectstart'</i>, preventDrag);
+</code><code id="L673"><span class="ln">673</span>            opts.binder(<i>'dragstart'</i>, preventDrag);
+</code><code id="L674"><span class="ln">674</span>            
+</code><code id="L675"><span class="ln">675</span>            <span class="c">// bind mouse wheel events</span>
+</code><code id="L676"><span class="ln">676</span>            opts.binder(<i>'mousewheel'</i>, handleWheel);
+</code><code id="L677"><span class="ln">677</span>            opts.binder(<i>'DOMMouseScroll'</i>, handleWheel);
+</code><code id="L678"><span class="ln">678</span>            
+</code><code id="L679"><span class="ln">679</span>            <b>return</b> {
+</code><code id="L680"><span class="ln">680</span>                unbind: unbind
+</code><code id="L681"><span class="ln">681</span>            };
+</code><code id="L682"><span class="ln">682</span>        }; <span class="c">// MouseHandler</span>
+</code><code id="L683"><span class="ln">683</span>        
+</code><code id="L684"><span class="ln">684</span>        <span class="c">// register the mouse pointer</span>
+</code><code id="L685"><span class="ln">685</span>        register(<i>'pointer'</i>, {
+</code><code id="L686"><span class="ln">686</span>            handler: MouseHandler,
+</code><code id="L687"><span class="ln">687</span>            checks: {
+</code><code id="L688"><span class="ln">688</span>                touch: <b>false</b>
+</code><code id="L689"><span class="ln">689</span>            }
+</code><code id="L690"><span class="ln">690</span>        });
+</code><code id="L691"><span class="ln">691</span>    
+</code><code id="L692"><span class="ln">692</span><span class="c">        <span class="c">/**</span>
+</span></code><code id="L693"><span class="ln">693</span><span class="c">        # TouchHandler(targetElement, opts)
+</span></code><code id="L694"><span class="ln">694</span><span class="c">        
+</span></code><code id="L695"><span class="ln">695</span><span class="c">        ## Valid Options
+</span></code><code id="L696"><span class="ln">696</span><span class="c">        
+</span></code><code id="L697"><span class="ln">697</span><span class="c">       <span class="s"> - </span>detailed: <b>boolean</b> (<b>default</b><span class="s"> = </span><b>false</b>)
+</span></code><code id="L698"><span class="ln">698</span><span class="c">       <span class="s"> - </span>inertia: <b>boolean</b> (<b>default</b><span class="s"> = </span><b>false</b>)
+</span></code><code id="L699"><span class="ln">699</span><span class="c">        */</span>
+</code><code id="L700"><span class="ln">700</span>        <b>var</b> TouchHandler<span class="s"> = </span><b>function</b>(targetElement, opts) {
+</code><code id="L701"><span class="ln">701</span>            <span class="c">// initialise opts</span>
+</code><code id="L702"><span class="ln">702</span>            opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L703"><span class="ln">703</span>            
+</code><code id="L704"><span class="ln">704</span>            <span class="c">// initialise constants</span>
+</code><code id="L705"><span class="ln">705</span>            <b>var</b> DEFAULT_INERTIA_MAX<span class="s"> = </span><span class="d">500</span>,
+</code><code id="L706"><span class="ln">706</span>                INERTIA_TIMEOUT_MOUSE<span class="s"> = </span><span class="d">100</span>,
+</code><code id="L707"><span class="ln">707</span>                INERTIA_TIMEOUT_TOUCH<span class="s"> = </span><span class="d">250</span>,
+</code><code id="L708"><span class="ln">708</span>                THRESHOLD_DOUBLETAP<span class="s"> = </span><span class="d">300</span>,
+</code><code id="L709"><span class="ln">709</span>                THRESHOLD_PINCHZOOM<span class="s"> = </span><span class="d">20</span>,
+</code><code id="L710"><span class="ln">710</span>                MIN_MOVEDIST<span class="s"> = </span><span class="d">7</span>,
+</code><code id="L711"><span class="ln">711</span>                EMPTY_TOUCH_DATA<span class="s"> = </span>{
+</code><code id="L712"><span class="ln">712</span>                    x: <span class="d">0</span>,
+</code><code id="L713"><span class="ln">713</span>                    y: <span class="d">0</span>
+</code><code id="L714"><span class="ln">714</span>                };
+</code><code id="L715"><span class="ln">715</span>        
+</code><code id="L716"><span class="ln">716</span>            <span class="c">// define the touch modes</span>
+</code><code id="L717"><span class="ln">717</span>            <b>var</b> TOUCH_MODE_UNKNOWN<span class="s"> = </span><span class="d">0</span>,
+</code><code id="L718"><span class="ln">718</span>                TOUCH_MODE_TAP<span class="s"> = </span><span class="d">1</span>,
+</code><code id="L719"><span class="ln">719</span>                TOUCH_MODE_MOVE<span class="s"> = </span><span class="d">2</span>,
+</code><code id="L720"><span class="ln">720</span>                TOUCH_MODE_PINCH<span class="s"> = </span><span class="d">3</span>;    
+</code><code id="L721"><span class="ln">721</span>            
+</code><code id="L722"><span class="ln">722</span>            <span class="c">// initialise variables</span>
+</code><code id="L723"><span class="ln">723</span>            <b>var</b> aggressiveCapture<span class="s"> = </span>opts.aggressiveCapture,
+</code><code id="L724"><span class="ln">724</span>                offset,
+</code><code id="L725"><span class="ln">725</span>                touchMode,
+</code><code id="L726"><span class="ln">726</span>                touchDown<span class="s"> = </span><b>false</b>,
+</code><code id="L727"><span class="ln">727</span>                touchesStart,
+</code><code id="L728"><span class="ln">728</span>                touchesCurrent,
+</code><code id="L729"><span class="ln">729</span>                startDistance,
+</code><code id="L730"><span class="ln">730</span>                touchesLast,
+</code><code id="L731"><span class="ln">731</span>                detailedEvents<span class="s"> = </span>opts.detailed,
+</code><code id="L732"><span class="ln">732</span>                scaling<span class="s"> = </span><span class="d">1</span>,
+</code><code id="L733"><span class="ln">733</span>                evtPointer<span class="s"> = </span><i>'interact.pointer'</i>,
+</code><code id="L734"><span class="ln">734</span>                evtTargetId<span class="s"> = </span>targetElement<span class="s"> &amp;&amp; </span>targetElement.id ? <i>'.'</i><span class="s"> + </span>targetElement.id : <i>''</i>,
+</code><code id="L735"><span class="ln">735</span>                evtPointerDown<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.down'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L736"><span class="ln">736</span>                evtPointerMultiDown<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.multi.down'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L737"><span class="ln">737</span>                evtPointerMove<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.move'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L738"><span class="ln">738</span>                evtPointerMultiMove<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.multi.move'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L739"><span class="ln">739</span>                evtPointerUp<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.up'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L740"><span class="ln">740</span>                evtPointerMultiUp<span class="s"> = </span>evtPointer<span class="s"> + </span><i>'.multi.up'</i><span class="s"> + </span>evtTargetId,
+</code><code id="L741"><span class="ln">741</span>                evtZoomPinch<span class="s"> = </span><i>'interact.zoom.pinch'</i><span class="s"> + </span>evtTargetId;
+</code><code id="L742"><span class="ln">742</span>        
+</code><code id="L743"><span class="ln">743</span><span class="c">            <span class="c"><span class="c">/* internal functions</span> */</span></span>
+</code><code id="L744"><span class="ln">744</span>            
+</code><code id="L745"><span class="ln">745</span>            <b>function</b> calcChange(first, second) {
+</code><code id="L746"><span class="ln">746</span>                <b>var</b> srcVector<span class="s"> = </span>(first<span class="s"> &amp;&amp; </span>(first.count > <span class="d">0</span>)) ? first.touches[<span class="d">0</span>] : <b>null</b>;
+</code><code id="L747"><span class="ln">747</span>                <b>if</b> (srcVector<span class="s"> &amp;&amp; </span>second<span class="s"> &amp;&amp; </span>(second.count > <span class="d">0</span>)) {
+</code><code id="L748"><span class="ln">748</span>                    <b>return</b> calcDiff(srcVector, second.touches[<span class="d">0</span>]);
+</code><code id="L749"><span class="ln">749</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L750"><span class="ln">750</span>        
+</code><code id="L751"><span class="ln">751</span>                <b>return</b> <b>null</b>;
+</code><code id="L752"><span class="ln">752</span>            } <span class="c">// calcChange</span>
+</code><code id="L753"><span class="ln">753</span>            
+</code><code id="L754"><span class="ln">754</span>            <span class="c">// TODO: modify <b>this</b> <b>function</b> to provide distance between any of the touches</span>
+</code><code id="L755"><span class="ln">755</span>            <span class="c">// rather then just the first two</span>
+</code><code id="L756"><span class="ln">756</span>            <b>function</b> calcTouchDistance(touchData) {
+</code><code id="L757"><span class="ln">757</span>                <b>if</b> (touchData.count &lt; <span class="d">2</span>) { 
+</code><code id="L758"><span class="ln">758</span>                    <b>return</b> <span class="d">0</span>; 
+</code><code id="L759"><span class="ln">759</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L760"><span class="ln">760</span>                
+</code><code id="L761"><span class="ln">761</span>                <b>var</b> xDist<span class="s"> = </span>touchData.x<span class="s"> - </span>touchData.next.x,
+</code><code id="L762"><span class="ln">762</span>                    yDist<span class="s"> = </span>touchData.y<span class="s"> - </span>touchData.next.y;
+</code><code id="L763"><span class="ln">763</span>        
+</code><code id="L764"><span class="ln">764</span>                <span class="c">// <b>return</b> the floored distance to keep math <b>in</b> the realm of integers...</span>
+</code><code id="L765"><span class="ln">765</span>                <b>return</b> ~~Math.sqrt(xDist<span class="s"> * </span>xDist<span class="s"> + </span>yDist<span class="s"> * </span>yDist);
+</code><code id="L766"><span class="ln">766</span>            } <span class="c">// touches</span>
+</code><code id="L767"><span class="ln">767</span>            
+</code><code id="L768"><span class="ln">768</span>            <b>function</b> copyTouches(src, adjustX, adjustY) {
+</code><code id="L769"><span class="ln">769</span>                <span class="c">// set to <span class="d">0</span> <b>if</b> not supplied</span>
+</code><code id="L770"><span class="ln">770</span>                adjustX<span class="s"> = </span>adjustX ? adjustX : <span class="d">0</span>;
+</code><code id="L771"><span class="ln">771</span>                adjustY<span class="s"> = </span>adjustY ? adjustY : <span class="d">0</span>;
+</code><code id="L772"><span class="ln">772</span>                
+</code><code id="L773"><span class="ln">773</span>                <b>var</b> firstTouch<span class="s"> = </span>{
+</code><code id="L774"><span class="ln">774</span>                        x: src.x<span class="s"> - </span>adjustX,
+</code><code id="L775"><span class="ln">775</span>                        y: src.y<span class="s"> - </span>adjustY,
+</code><code id="L776"><span class="ln">776</span>                        id: src.id,
+</code><code id="L777"><span class="ln">777</span>                        count: src.count
+</code><code id="L778"><span class="ln">778</span>                    },
+</code><code id="L779"><span class="ln">779</span>                    touchData<span class="s"> = </span>firstTouch;
+</code><code id="L780"><span class="ln">780</span>                    
+</code><code id="L781"><span class="ln">781</span>                <b>while</b> (src.next) {
+</code><code id="L782"><span class="ln">782</span>                    src<span class="s"> = </span>src.next;
+</code><code id="L783"><span class="ln">783</span>                    
+</code><code id="L784"><span class="ln">784</span>                    touchData<span class="s"> = </span>touchData.next<span class="s"> = </span>{
+</code><code id="L785"><span class="ln">785</span>                        x: src.x<span class="s"> - </span>adjustX,
+</code><code id="L786"><span class="ln">786</span>                        y: src.y<span class="s"> - </span>adjustY,
+</code><code id="L787"><span class="ln">787</span>                        id: src.id
+</code><code id="L788"><span class="ln">788</span>                    };
+</code><code id="L789"><span class="ln">789</span>                } <span class="c">// <b>while</b></span>
+</code><code id="L790"><span class="ln">790</span>                
+</code><code id="L791"><span class="ln">791</span>                <b>return</b> firstTouch;
+</code><code id="L792"><span class="ln">792</span>            } <span class="c">// copyTouches</span>
+</code><code id="L793"><span class="ln">793</span>            
+</code><code id="L794"><span class="ln">794</span>            <b>function</b> getTouchCenter(touchData) {
+</code><code id="L795"><span class="ln">795</span>                <b>var</b> x1<span class="s"> = </span>touchData.x,
+</code><code id="L796"><span class="ln">796</span>                    x2<span class="s"> = </span>touchData.next.x,
+</code><code id="L797"><span class="ln">797</span>                    y1<span class="s"> = </span>touchData.y,
+</code><code id="L798"><span class="ln">798</span>                    y2<span class="s"> = </span>touchData.next.y,
+</code><code id="L799"><span class="ln">799</span>                    minX<span class="s"> = </span>x1 &lt; x2 ? x1 : x2,
+</code><code id="L800"><span class="ln">800</span>                    minY<span class="s"> = </span>y1 &lt; y2 ? y1 : y2,
+</code><code id="L801"><span class="ln">801</span>                    width<span class="s"> = </span>Math.abs(x1<span class="s"> - </span>x2),
+</code><code id="L802"><span class="ln">802</span>                    height<span class="s"> = </span>Math.abs(y1<span class="s"> - </span>y2);
+</code><code id="L803"><span class="ln">803</span>                    
+</code><code id="L804"><span class="ln">804</span>                <b>return</b> {
+</code><code id="L805"><span class="ln">805</span>                    x: minX<span class="s"> + </span>(width >> <span class="d">1</span>),
+</code><code id="L806"><span class="ln">806</span>                    y: minY<span class="s"> + </span>(height >> <span class="d">1</span>)
+</code><code id="L807"><span class="ln">807</span>                };
+</code><code id="L808"><span class="ln">808</span>            } <span class="c">// getTouchCenter</span>
+</code><code id="L809"><span class="ln">809</span>            
+</code><code id="L810"><span class="ln">810</span>            <b>function</b> getTouchData(evt, evtProp) {
+</code><code id="L811"><span class="ln">811</span>                <b>var</b> touches<span class="s"> = </span>evt[evtProp ? evtProp : <i>'touches'</i>],
+</code><code id="L812"><span class="ln">812</span>                    firstTouch, touchData;
+</code><code id="L813"><span class="ln">813</span>                    
+</code><code id="L814"><span class="ln">814</span>                <b>if</b> (touches.length<span class="s"> === </span><span class="d">0</span>) {
+</code><code id="L815"><span class="ln">815</span>                    <b>return</b> <b>null</b>;
+</code><code id="L816"><span class="ln">816</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L817"><span class="ln">817</span>                    
+</code><code id="L818"><span class="ln">818</span>                <span class="c">// assign the first touch and touch data</span>
+</code><code id="L819"><span class="ln">819</span>                touchData<span class="s"> = </span>firstTouch<span class="s"> = </span>{
+</code><code id="L820"><span class="ln">820</span>                        x: touches[<span class="d">0</span>].pageX,
+</code><code id="L821"><span class="ln">821</span>                        y: touches[<span class="d">0</span>].pageY,
+</code><code id="L822"><span class="ln">822</span>                        id: touches[<span class="d">0</span>].identifier,
+</code><code id="L823"><span class="ln">823</span>                        count: touches.length
+</code><code id="L824"><span class="ln">824</span>                };
+</code><code id="L825"><span class="ln">825</span>                    
+</code><code id="L826"><span class="ln">826</span>                <b>for</b> (<b>var</b> ii<span class="s"> = </span><span class="d">1</span>, touchCount<span class="s"> = </span>touches.length; ii &lt; touchCount; ii++) {
+</code><code id="L827"><span class="ln">827</span>                    touchData<span class="s"> = </span>touchData.next<span class="s"> = </span>{
+</code><code id="L828"><span class="ln">828</span>                        x: touches[ii].pageX,
+</code><code id="L829"><span class="ln">829</span>                        y: touches[ii].pageY,
+</code><code id="L830"><span class="ln">830</span>                        id: touches[ii].identifier
+</code><code id="L831"><span class="ln">831</span>                    };
+</code><code id="L832"><span class="ln">832</span>                } <span class="c">// <b>for</b></span>
+</code><code id="L833"><span class="ln">833</span>                
+</code><code id="L834"><span class="ln">834</span>                <b>return</b> firstTouch;
+</code><code id="L835"><span class="ln">835</span>            } <span class="c">// fillTouchData</span>
+</code><code id="L836"><span class="ln">836</span>            
+</code><code id="L837"><span class="ln">837</span>            <b>function</b> handleTouchStart(evt) {
+</code><code id="L838"><span class="ln">838</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L839"><span class="ln">839</span>                    <span class="c">// update the offset</span>
+</code><code id="L840"><span class="ln">840</span>                    offset<span class="s"> = </span>getOffset(targetElement);
+</code><code id="L841"><span class="ln">841</span>        
+</code><code id="L842"><span class="ln">842</span>                    <span class="c">// initialise variables</span>
+</code><code id="L843"><span class="ln">843</span>                    <b>var</b> changedTouches<span class="s"> = </span>getTouchData(evt, <i>'changedTouches'</i>),
+</code><code id="L844"><span class="ln">844</span>                        relTouches<span class="s"> = </span>copyTouches(changedTouches, offset.left, offset.top),
+</code><code id="L845"><span class="ln">845</span>                        evtArgs<span class="s"> = </span>[targetElement, evt, changedTouches, relTouches];
+</code><code id="L846"><span class="ln">846</span>                    
+</code><code id="L847"><span class="ln">847</span>                    <span class="c">// prevent the <b>default</b> action</span>
+</code><code id="L848"><span class="ln">848</span>                    <b>if</b> (aggressiveCapture) {
+</code><code id="L849"><span class="ln">849</span>                        preventDefault(evt, <b>true</b>);
+</code><code id="L850"><span class="ln">850</span>                    }
+</code><code id="L851"><span class="ln">851</span>        
+</code><code id="L852"><span class="ln">852</span>                    <b>if</b> (! touchesStart) {
+</code><code id="L853"><span class="ln">853</span>                        <span class="c">// reset the touch mode to unknown</span>
+</code><code id="L854"><span class="ln">854</span>                        touchMode<span class="s"> = </span>TOUCH_MODE_TAP;
+</code><code id="L855"><span class="ln">855</span>                        eve.apply(eve, [evtPointerDown].concat(evtArgs));
+</code><code id="L856"><span class="ln">856</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L857"><span class="ln">857</span>                    
+</code><code id="L858"><span class="ln">858</span>                    <span class="c">// <b>if</b> we are providing detailed events, then trigger the pointer down multi</span>
+</code><code id="L859"><span class="ln">859</span>                    <b>if</b> (detailedEvents) {
+</code><code id="L860"><span class="ln">860</span>                        eve.apply(eve, [evtPointerMultiDown].concat(evtArgs));
+</code><code id="L861"><span class="ln">861</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L862"><span class="ln">862</span>                    
+</code><code id="L863"><span class="ln">863</span>                    touchesStart<span class="s"> = </span>getTouchData(evt);
+</code><code id="L864"><span class="ln">864</span>                    
+</code><code id="L865"><span class="ln">865</span>                    <span class="c">// check the start distance</span>
+</code><code id="L866"><span class="ln">866</span>                    <b>if</b> (touchesStart.count > <span class="d">1</span>) {
+</code><code id="L867"><span class="ln">867</span>                        startDistance<span class="s"> = </span>calcTouchDistance(touchesStart);
+</code><code id="L868"><span class="ln">868</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L869"><span class="ln">869</span>                    
+</code><code id="L870"><span class="ln">870</span>                    <span class="c">// reset the scaling</span>
+</code><code id="L871"><span class="ln">871</span>                    scaling<span class="s"> = </span><span class="d">1</span>;
+</code><code id="L872"><span class="ln">872</span>                    
+</code><code id="L873"><span class="ln">873</span>                    <span class="c">// update the last touches</span>
+</code><code id="L874"><span class="ln">874</span>                    touchesLast<span class="s"> = </span>copyTouches(touchesStart);
+</code><code id="L875"><span class="ln">875</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L876"><span class="ln">876</span>            } <span class="c">// handleTouchStart</span>
+</code><code id="L877"><span class="ln">877</span>            
+</code><code id="L878"><span class="ln">878</span>            <b>function</b> handleTouchMove(evt) {
+</code><code id="L879"><span class="ln">879</span>                <b>var</b> cancelTap, evtArgs;
+</code><code id="L880"><span class="ln">880</span>                
+</code><code id="L881"><span class="ln">881</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L882"><span class="ln">882</span>                    <span class="c">// prevent the <b>default</b> action</span>
+</code><code id="L883"><span class="ln">883</span>                    <b>if</b> (aggressiveCapture) {
+</code><code id="L884"><span class="ln">884</span>                        preventDefault(evt, <b>true</b>);
+</code><code id="L885"><span class="ln">885</span>                    }
+</code><code id="L886"><span class="ln">886</span>        
+</code><code id="L887"><span class="ln">887</span>                    <span class="c">// fill the touch data</span>
+</code><code id="L888"><span class="ln">888</span>                    touchesCurrent<span class="s"> = </span>getTouchData(evt);
+</code><code id="L889"><span class="ln">889</span>                    
+</code><code id="L890"><span class="ln">890</span>                    <span class="c">// <b>if</b> the touch mode is currently tap, then check the distance from the start touch</span>
+</code><code id="L891"><span class="ln">891</span>                    <b>if</b> (touchMode<span class="s"> == </span>TOUCH_MODE_TAP) {
+</code><code id="L892"><span class="ln">892</span>                        cancelTap<span class="s"> = </span>
+</code><code id="L893"><span class="ln">893</span>                            Math.abs(touchesStart.x<span class="s"> - </span>touchesCurrent.x) > MIN_MOVEDIST<span class="s"> || </span>
+</code><code id="L894"><span class="ln">894</span>                            Math.abs(touchesStart.y<span class="s"> - </span>touchesCurrent.y) > MIN_MOVEDIST;
+</code><code id="L895"><span class="ln">895</span>        
+</code><code id="L896"><span class="ln">896</span>                        <span class="c">// update the touch mode based on the result</span>
+</code><code id="L897"><span class="ln">897</span>                        touchMode<span class="s"> = </span>cancelTap ? TOUCH_MODE_UNKNOWN : TOUCH_MODE_TAP;
+</code><code id="L898"><span class="ln">898</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L899"><span class="ln">899</span>                    
+</code><code id="L900"><span class="ln">900</span>                    <b>if</b> (touchMode != TOUCH_MODE_TAP) {
+</code><code id="L901"><span class="ln">901</span>                        touchMode<span class="s"> = </span>touchesCurrent.count > <span class="d">1</span> ? TOUCH_MODE_PINCH : TOUCH_MODE_MOVE;
+</code><code id="L902"><span class="ln">902</span>        
+</code><code id="L903"><span class="ln">903</span>                        <span class="c">// TOUCH_MODE_PINCH extra checks</span>
+</code><code id="L904"><span class="ln">904</span>                        <span class="c">// <b>if</b> we had multiple touches, then the touch mode is probably pinch, but we</span>
+</code><code id="L905"><span class="ln">905</span>                        <span class="c">// need to check <b>this</b> by checking the zoom distance between the start touches </span>
+</code><code id="L906"><span class="ln">906</span>                        <span class="c">// and the current touches</span>
+</code><code id="L907"><span class="ln">907</span>                        <b>if</b> (touchMode<span class="s"> == </span>TOUCH_MODE_PINCH) {
+</code><code id="L908"><span class="ln">908</span>                            <span class="c">// check that the first touches have two touches, <b>if</b> not copy the current touches</span>
+</code><code id="L909"><span class="ln">909</span>                            <b>if</b> (touchesStart.count<span class="s"> === </span><span class="d">1</span>) {
+</code><code id="L910"><span class="ln">910</span>                                touchesStart<span class="s"> = </span>copyTouches(touchesCurrent);
+</code><code id="L911"><span class="ln">911</span>                                startDistance<span class="s"> = </span>calcTouchDistance(touchesStart);
+</code><code id="L912"><span class="ln">912</span>                            }
+</code><code id="L913"><span class="ln">913</span>                            <b>else</b> {
+</code><code id="L914"><span class="ln">914</span>                                <span class="c">// calculate the current distance</span>
+</code><code id="L915"><span class="ln">915</span>                                <b>var</b> touchDistance<span class="s"> = </span>calcTouchDistance(touchesCurrent),
+</code><code id="L916"><span class="ln">916</span>                                    distanceDelta<span class="s"> = </span>Math.abs(startDistance<span class="s"> - </span>touchDistance);
+</code><code id="L917"><span class="ln">917</span>                                    
+</code><code id="L918"><span class="ln">918</span>                                <span class="c">// <b>if</b> the distance is not great enough then <b>switch</b> back to move </span>
+</code><code id="L919"><span class="ln">919</span>                                <b>if</b> (distanceDelta &lt; THRESHOLD_PINCHZOOM) {
+</code><code id="L920"><span class="ln">920</span>                                    touchMode<span class="s"> = </span>TOUCH_MODE_MOVE;
+</code><code id="L921"><span class="ln">921</span>                                }
+</code><code id="L922"><span class="ln">922</span>                                <span class="c">// otherwise, raise the zoom event</span>
+</code><code id="L923"><span class="ln">923</span>                                <b>else</b> {
+</code><code id="L924"><span class="ln">924</span>                                    <b>var</b> current<span class="s"> = </span>getTouchCenter(touchesCurrent),
+</code><code id="L925"><span class="ln">925</span>                                        currentScaling<span class="s"> = </span>touchDistance<span class="s"> / </span>startDistance,
+</code><code id="L926"><span class="ln">926</span>                                        scaleChange<span class="s"> = </span>currentScaling<span class="s"> - </span>scaling;
+</code><code id="L927"><span class="ln">927</span>                                        
+</code><code id="L928"><span class="ln">928</span>                                    <span class="c">// trigger the zoom event</span>
+</code><code id="L929"><span class="ln">929</span>                                    eve(evtZoomPinch, targetElement, evt, current, 
+</code><code id="L930"><span class="ln">930</span>                                        pointerOffset(current, offset), scaleChange);
+</code><code id="L931"><span class="ln">931</span>                                    
+</code><code id="L932"><span class="ln">932</span>                                    <span class="c">// update the scaling</span>
+</code><code id="L933"><span class="ln">933</span>                                    scaling<span class="s"> = </span>currentScaling;
+</code><code id="L934"><span class="ln">934</span>                                } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L935"><span class="ln">935</span>                            } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L936"><span class="ln">936</span>                        } <span class="c">// <b>if</b></span>
+</code><code id="L937"><span class="ln">937</span>        
+</code><code id="L938"><span class="ln">938</span>                        <span class="c">// initialise the event args</span>
+</code><code id="L939"><span class="ln">939</span>                        evtArgs<span class="s"> = </span>[
+</code><code id="L940"><span class="ln">940</span>                            targetElement,
+</code><code id="L941"><span class="ln">941</span>                            evt,
+</code><code id="L942"><span class="ln">942</span>                            touchesCurrent,
+</code><code id="L943"><span class="ln">943</span>                            copyTouches(touchesCurrent, offset.left, offset.top),
+</code><code id="L944"><span class="ln">944</span>                            point(touchesCurrent.x<span class="s"> - </span>touchesLast.x, touchesCurrent.y<span class="s"> - </span>touchesLast.y)
+</code><code id="L945"><span class="ln">945</span>                        ];
+</code><code id="L946"><span class="ln">946</span>                        
+</code><code id="L947"><span class="ln">947</span>                        <span class="c">// <b>if</b> the touch mode is move, then trigger a pointer move on the first touch</span>
+</code><code id="L948"><span class="ln">948</span>                        <b>if</b> (touchMode<span class="s"> == </span>TOUCH_MODE_MOVE) {
+</code><code id="L949"><span class="ln">949</span>                            <span class="c">// trigger the pointer move event</span>
+</code><code id="L950"><span class="ln">950</span>                            eve.apply(eve, [evtPointerMove].concat(evtArgs));
+</code><code id="L951"><span class="ln">951</span>                        } <span class="c">// <b>if</b></span>
+</code><code id="L952"><span class="ln">952</span>                        
+</code><code id="L953"><span class="ln">953</span>                        <span class="c">// fire a touch multi event <b>for</b> custom event handling</span>
+</code><code id="L954"><span class="ln">954</span>                        <b>if</b> (detailedEvents) {
+</code><code id="L955"><span class="ln">955</span>                            eve.apply(eve, [evePointerMultiMove].concat(evtArgs));
+</code><code id="L956"><span class="ln">956</span>                        } <span class="c">// <b>if</b></span>
+</code><code id="L957"><span class="ln">957</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L958"><span class="ln">958</span>                    
+</code><code id="L959"><span class="ln">959</span>                    touchesLast<span class="s"> = </span>copyTouches(touchesCurrent);
+</code><code id="L960"><span class="ln">960</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L961"><span class="ln">961</span>            } <span class="c">// handleTouchMove</span>
+</code><code id="L962"><span class="ln">962</span>            
+</code><code id="L963"><span class="ln">963</span>            <b>function</b> handleTouchEnd(evt) {
+</code><code id="L964"><span class="ln">964</span>                <b>if</b> (matchTarget(evt, targetElement)) {
+</code><code id="L965"><span class="ln">965</span>                    <b>var</b> changedTouches<span class="s"> = </span>getTouchData(evt, <i>'changedTouches'</i>),
+</code><code id="L966"><span class="ln">966</span>                        offsetTouches<span class="s"> = </span>copyTouches(changedTouches, offset.left, offset.top),
+</code><code id="L967"><span class="ln">967</span>                        evtArgs<span class="s"> = </span>[targetElement, evt, changedTouches, offsetTouches];
+</code><code id="L968"><span class="ln">968</span>                    
+</code><code id="L969"><span class="ln">969</span>                    <span class="c">// get the current touches</span>
+</code><code id="L970"><span class="ln">970</span>                    touchesCurrent<span class="s"> = </span>getTouchData(evt);
+</code><code id="L971"><span class="ln">971</span>                    
+</code><code id="L972"><span class="ln">972</span>                    <span class="c">// prevent the <b>default</b> action</span>
+</code><code id="L973"><span class="ln">973</span>                    <b>if</b> (aggressiveCapture) {
+</code><code id="L974"><span class="ln">974</span>                        preventDefault(evt, <b>true</b>);
+</code><code id="L975"><span class="ln">975</span>                    }
+</code><code id="L976"><span class="ln">976</span>        
+</code><code id="L977"><span class="ln">977</span>                    <span class="c">// <b>if</b> <b>this</b> is the last touch to be removed <b>do</b> some extra checks</span>
+</code><code id="L978"><span class="ln">978</span>                    <b>if</b> (! touchesCurrent) {
+</code><code id="L979"><span class="ln">979</span>                        eve.apply(eve, [evtPointerUp].concat(evtArgs));
+</code><code id="L980"><span class="ln">980</span>                        touchesStart<span class="s"> = </span><b>null</b>;
+</code><code id="L981"><span class="ln">981</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L982"><span class="ln">982</span>                    
+</code><code id="L983"><span class="ln">983</span>                    <span class="c">// <b>if</b> we are monitoring detailed events, then trigger up multi</span>
+</code><code id="L984"><span class="ln">984</span>                    <b>if</b> (detailedEvents) {
+</code><code id="L985"><span class="ln">985</span>                        eve.apply(evt, [evtPointerMultiUp].concat(evtArgs));
+</code><code id="L986"><span class="ln">986</span>                    } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L987"><span class="ln">987</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L988"><span class="ln">988</span>            } <span class="c">// handleTouchEnd</span>
+</code><code id="L989"><span class="ln">989</span>            
+</code><code id="L990"><span class="ln">990</span>            <b>function</b> initTouchData() {
+</code><code id="L991"><span class="ln">991</span>                <b>return</b> {
+</code><code id="L992"><span class="ln">992</span>                    x: <span class="d">0</span>,
+</code><code id="L993"><span class="ln">993</span>                    y: <span class="d">0</span>,
+</code><code id="L994"><span class="ln">994</span>                    next: <b>null</b>
+</code><code id="L995"><span class="ln">995</span>                };
+</code><code id="L996"><span class="ln">996</span>            } <span class="c">// initTouchData</span>
+</code><code id="L997"><span class="ln">997</span>        
+</code><code id="L998"><span class="ln">998</span><span class="c">            <span class="c"><span class="c">/* exports</span> */</span></span>
+</code><code id="L999"><span class="ln">999</span>            
+</code><code id="L1000"><span class="ln">1000</span>            <b>function</b> unbind() {
+</code><code id="L1001"><span class="ln">1001</span>                opts.unbinder(<i>'touchstart'</i>, handleTouchStart);
+</code><code id="L1002"><span class="ln">1002</span>                opts.unbinder(<i>'touchmove'</i>, handleTouchMove);
+</code><code id="L1003"><span class="ln">1003</span>                opts.unbinder(<i>'touchend'</i>, handleTouchEnd);
+</code><code id="L1004"><span class="ln">1004</span>            } <span class="c">// unbind</span>
+</code><code id="L1005"><span class="ln">1005</span>            
+</code><code id="L1006"><span class="ln">1006</span>            <span class="c">// wire up the event handlers</span>
+</code><code id="L1007"><span class="ln">1007</span>            opts.binder(<i>'touchstart'</i>, handleTouchStart);
+</code><code id="L1008"><span class="ln">1008</span>            opts.binder(<i>'touchmove'</i>, handleTouchMove);
+</code><code id="L1009"><span class="ln">1009</span>            opts.binder(<i>'touchend'</i>, handleTouchEnd);
+</code><code id="L1010"><span class="ln">1010</span>            
+</code><code id="L1011"><span class="ln">1011</span>            <b>return</b> {
+</code><code id="L1012"><span class="ln">1012</span>                unbind: unbind
+</code><code id="L1013"><span class="ln">1013</span>            };
+</code><code id="L1014"><span class="ln">1014</span>        }; <span class="c">// TouchHandler</span>
+</code><code id="L1015"><span class="ln">1015</span>        
+</code><code id="L1016"><span class="ln">1016</span>        <span class="c">// register the mouse pointer</span>
+</code><code id="L1017"><span class="ln">1017</span>        register(<i>'pointer'</i>, {
+</code><code id="L1018"><span class="ln">1018</span>            handler: TouchHandler,
+</code><code id="L1019"><span class="ln">1019</span>            checks: {
+</code><code id="L1020"><span class="ln">1020</span>                touch: <b>true</b>
+</code><code id="L1021"><span class="ln">1021</span>            }
+</code><code id="L1022"><span class="ln">1022</span>        });
+</code><code id="L1023"><span class="ln">1023</span>    
+</code><code id="L1024"><span class="ln">1024</span>        
+</code><code id="L1025"><span class="ln">1025</span>        <span class="c">// add some helpful wrappers</span>
+</code><code id="L1026"><span class="ln">1026</span>        eve.on(<i>'interact.pointer.down'</i>, <b>function</b>(evt, absXY, relXY) {
+</code><code id="L1027"><span class="ln">1027</span>            <b>var</b> ctrlName<span class="s"> = </span>eve.nt().replace(reLastChunk, <i>'$<span class="d">1</span>'</i>);
+</code><code id="L1028"><span class="ln">1028</span>            
+</code><code id="L1029"><span class="ln">1029</span>            <b>if</b> (ctrlName) {
+</code><code id="L1030"><span class="ln">1030</span>                lastXY[ctrlName]<span class="s"> = </span>{
+</code><code id="L1031"><span class="ln">1031</span>                    x: relXY.x,
+</code><code id="L1032"><span class="ln">1032</span>                    y: relXY.y
+</code><code id="L1033"><span class="ln">1033</span>                };
+</code><code id="L1034"><span class="ln">1034</span>            } <span class="c">// <b>if</b></span>
+</code><code id="L1035"><span class="ln">1035</span>            
+</code><code id="L1036"><span class="ln">1036</span>            <span class="c">// save the down target</span>
+</code><code id="L1037"><span class="ln">1037</span>            downTarget<span class="s"> = </span><b>this</b>;
+</code><code id="L1038"><span class="ln">1038</span>        });    
+</code><code id="L1039"><span class="ln">1039</span>        
+</code><code id="L1040"><span class="ln">1040</span>        <span class="c">// handle pointer move events</span>
+</code><code id="L1041"><span class="ln">1041</span>        eve.on(<i>'interact.pointer.move'</i>, <b>function</b>(evt, absXY, relXY) {
+</code><code id="L1042"><span class="ln">1042</span>            <b>var</b> ctrlName<span class="s"> = </span>eve.nt().replace(reLastChunk, <i>'$<span class="d">1</span>'</i>);
+</code><code id="L1043"><span class="ln">1043</span>            
+</code><code id="L1044"><span class="ln">1044</span>            <b>if</b> (ctrlName<span class="s"> &amp;&amp; </span>lastXY[ctrlName]) {
+</code><code id="L1045"><span class="ln">1045</span>                <b>var</b> deltaX<span class="s"> = </span>relXY.x<span class="s"> - </span>lastXY[ctrlName].x,
+</code><code id="L1046"><span class="ln">1046</span>                    deltaY<span class="s"> = </span>relXY.y<span class="s"> - </span>lastXY[ctrlName].y;
+</code><code id="L1047"><span class="ln">1047</span>    
+</code><code id="L1048"><span class="ln">1048</span>                <span class="c">// trigger the pan event</span>
+</code><code id="L1049"><span class="ln">1049</span>                eve(<i>'interact.pan.'</i><span class="s"> + </span>ctrlName, <b>this</b>, evt, deltaX, deltaY, absXY, relXY);
+</code><code id="L1050"><span class="ln">1050</span>    
+</code><code id="L1051"><span class="ln">1051</span>                <span class="c">// update the last xy</span>
+</code><code id="L1052"><span class="ln">1052</span>                lastXY[ctrlName]<span class="s"> = </span>{
+</code><code id="L1053"><span class="ln">1053</span>                    x: relXY.x,
+</code><code id="L1054"><span class="ln">1054</span>                    y: relXY.y
+</code><code id="L1055"><span class="ln">1055</span>                };
+</code><code id="L1056"><span class="ln">1056</span>            } <span class="c">// <b>if</b></span>
+</code><code id="L1057"><span class="ln">1057</span>        });
+</code><code id="L1058"><span class="ln">1058</span>        
+</code><code id="L1059"><span class="ln">1059</span>        eve.on(<i>'interact.pointer.up'</i>, <b>function</b>(evt, absXY, relXY) {
+</code><code id="L1060"><span class="ln">1060</span>            <b>var</b> ctrlName<span class="s"> = </span>eve.nt().replace(reLastChunk, <i>'$<span class="d">1</span>'</i>);
+</code><code id="L1061"><span class="ln">1061</span>            
+</code><code id="L1062"><span class="ln">1062</span>            <b>if</b> (<b>this</b><span class="s"> === </span>downTarget) {
+</code><code id="L1063"><span class="ln">1063</span>                eve(<i>'interact.tap'</i><span class="s"> + </span>(ctrlName ? <i>'.'</i><span class="s"> + </span>ctrlName : <i>''</i>), <b>this</b>, evt, absXY, relXY);
+</code><code id="L1064"><span class="ln">1064</span>            } <span class="c">// <b>if</b></span>
+</code><code id="L1065"><span class="ln">1065</span>        });
+</code><code id="L1066"><span class="ln">1066</span>        
+</code><code id="L1067"><span class="ln">1067</span>        <b>return</b> {
+</code><code id="L1068"><span class="ln">1068</span>            register: register,
+</code><code id="L1069"><span class="ln">1069</span>            watch: watch
+</code><code id="L1070"><span class="ln">1070</span>        };
+</code><code id="L1071"><span class="ln">1071</span>    })();
+</code><code id="L1072"><span class="ln">1072</span>    
+</code><code id="L1073"><span class="ln">1073</span>    
+</code><code id="L1074"><span class="ln">1074</span>
+</code><code id="L1075"><span class="ln">1075</span>}
+</code><code id="L1076"><span class="ln">1076</span>
+</code><code id="L1077"><span class="ln">1077</span><b>var</b> MapControls<span class="s"> = </span>(<b>function</b>() {
+</code><code id="L1078"><span class="ln">1078</span>    
+</code><code id="L1079"><span class="ln">1079</span>    <b>var</b> _dom<span class="s"> = </span>(<b>function</b>() {
+</code><code id="L1080"><span class="ln">1080</span>        
+</code><code id="L1081"><span class="ln">1081</span>        <b>var</b> _reWhitespace<span class="s"> = </span>/[\s\,]\s*/,
+</code><code id="L1082"><span class="ln">1082</span>            _reAlignOffset<span class="s"> = </span>/^(.*?)([\-\+]?\d*)$/,
+</code><code id="L1083"><span class="ln">1083</span>            _aligners<span class="s"> = </span>{
+</code><code id="L1084"><span class="ln">1084</span>                left: <b>function</b>(b, pb, offset) {
+</code><code id="L1085"><span class="ln">1085</span>                    <b>this</b>.style[<i>'margin-left'</i>]<span class="s"> = </span>(offset<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1086"><span class="ln">1086</span>                },
+</code><code id="L1087"><span class="ln">1087</span>                
+</code><code id="L1088"><span class="ln">1088</span>                center: <b>function</b>(b, pb, offset) {
+</code><code id="L1089"><span class="ln">1089</span>                    <b>this</b>.style[<i>'margin-left'</i>]<span class="s"> = </span>(((pb.width<span class="s"> - </span>b.width) >> <span class="d">1</span>)<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1090"><span class="ln">1090</span>                },
+</code><code id="L1091"><span class="ln">1091</span>                
+</code><code id="L1092"><span class="ln">1092</span>                right: <b>function</b>(b, pb, offset) {
+</code><code id="L1093"><span class="ln">1093</span>                    <b>this</b>.style[<i>'margin-left'</i>]<span class="s"> = </span>(pb.width<span class="s"> - </span>b.width<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1094"><span class="ln">1094</span>                },
+</code><code id="L1095"><span class="ln">1095</span>                
+</code><code id="L1096"><span class="ln">1096</span>                top: <b>function</b>(b, pb, offset) {
+</code><code id="L1097"><span class="ln">1097</span>                    <b>this</b>.style[<i>'margin-top'</i>]<span class="s"> = </span>(offset<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1098"><span class="ln">1098</span>                },
+</code><code id="L1099"><span class="ln">1099</span>                
+</code><code id="L1100"><span class="ln">1100</span>                middle: <b>function</b>(b, pb, offset) {
+</code><code id="L1101"><span class="ln">1101</span>                    <b>this</b>.style[<i>'margin-top'</i>]<span class="s"> = </span>(((pb.height<span class="s"> - </span>b.height) >> <span class="d">1</span>)<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1102"><span class="ln">1102</span>                },
+</code><code id="L1103"><span class="ln">1103</span>                
+</code><code id="L1104"><span class="ln">1104</span>                bottom: <b>function</b>(b, pb, offset) {
+</code><code id="L1105"><span class="ln">1105</span>                    <b>this</b>.style[<i>'margin-top'</i>]<span class="s"> = </span>(pb.height<span class="s"> - </span>b.height<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1106"><span class="ln">1106</span>                }
+</code><code id="L1107"><span class="ln">1107</span>            };
+</code><code id="L1108"><span class="ln">1108</span>        
+</code><code id="L1109"><span class="ln">1109</span>        <b>function</b> create(tag, attributes, css) {
+</code><code id="L1110"><span class="ln">1110</span>            <b>var</b> element<span class="s"> = </span>document.createElement(tag), key;
+</code><code id="L1111"><span class="ln">1111</span>            
+</code><code id="L1112"><span class="ln">1112</span>            <span class="c">// iterate through the attributes</span>
+</code><code id="L1113"><span class="ln">1113</span>            <b>for</b> (key <b>in</b> attributes) {
+</code><code id="L1114"><span class="ln">1114</span>                <b>if</b> (attributes.hasOwnProperty(key)) {
+</code><code id="L1115"><span class="ln">1115</span>                    element[key]<span class="s"> = </span>attributes[key];
+</code><code id="L1116"><span class="ln">1116</span>                } 
+</code><code id="L1117"><span class="ln">1117</span>            } 
+</code><code id="L1118"><span class="ln">1118</span>            
+</code><code id="L1119"><span class="ln">1119</span>            <b>for</b> (key <b>in</b> css) {
+</code><code id="L1120"><span class="ln">1120</span>                <b>if</b> (css.hasOwnProperty(key)) {
+</code><code id="L1121"><span class="ln">1121</span>                    element.style[key]<span class="s"> = </span>css[key];
+</code><code id="L1122"><span class="ln">1122</span>                }
+</code><code id="L1123"><span class="ln">1123</span>            }
+</code><code id="L1124"><span class="ln">1124</span>            
+</code><code id="L1125"><span class="ln">1125</span>            <b>return</b> element;
+</code><code id="L1126"><span class="ln">1126</span>        } <span class="c">// createEl</span>
+</code><code id="L1127"><span class="ln">1127</span>        
+</code><code id="L1128"><span class="ln">1128</span>        <b>function</b> position(element, alignment) {
+</code><code id="L1129"><span class="ln">1129</span>            <span class="c">// <b>if</b> we have an element and a containing node, then process</span>
+</code><code id="L1130"><span class="ln">1130</span>            <b>if</b> (element<span class="s"> &amp;&amp; </span>element.parentNode) {
+</code><code id="L1131"><span class="ln">1131</span>                <b>var</b> aligns<span class="s"> = </span>(alignment<span class="s"> || </span><i>''</i>).split(_reWhitespace),
+</code><code id="L1132"><span class="ln">1132</span>                    alignA<span class="s"> = </span>_reAlignOffset.exec(aligns[<span class="d">0</span>])<span class="s"> || </span>[, <i>'left'</i>, <span class="d">0</span>],
+</code><code id="L1133"><span class="ln">1133</span>                    alignB<span class="s"> = </span>_reAlignOffset.exec(aligns[<span class="d">1</span>])<span class="s"> || </span>[, <i>'top'</i>, <span class="d">0</span>],
+</code><code id="L1134"><span class="ln">1134</span>                    alignerA<span class="s"> = </span>_aligners[alignA[<span class="d">1</span>]]<span class="s"> || </span>_aligners.left,
+</code><code id="L1135"><span class="ln">1135</span>                    alignerB<span class="s"> = </span>_aligners[alignB[<span class="d">1</span>]]<span class="s"> || </span>_aligners.top,
+</code><code id="L1136"><span class="ln">1136</span>                    bounds<span class="s"> = </span>element.getBoundingClientRect(),
+</code><code id="L1137"><span class="ln">1137</span>                    parentBounds<span class="s"> = </span>element.parentNode.getBoundingClientRect();
+</code><code id="L1138"><span class="ln">1138</span>                
+</code><code id="L1139"><span class="ln">1139</span>                <span class="c">// set the position to absolute</span>
+</code><code id="L1140"><span class="ln">1140</span>                element.style.position<span class="s"> = </span><i>'absolute'</i>;
+</code><code id="L1141"><span class="ln">1141</span>    
+</code><code id="L1142"><span class="ln">1142</span>                <span class="c">// position the element</span>
+</code><code id="L1143"><span class="ln">1143</span>                alignerA.call(element, bounds, parentBounds, parseInt(alignA[<span class="d">2</span>], <span class="d">10</span>));
+</code><code id="L1144"><span class="ln">1144</span>                alignerB.call(element, bounds, parentBounds, parseInt(alignB[<span class="d">2</span>], <span class="d">10</span>));
+</code><code id="L1145"><span class="ln">1145</span>            }
+</code><code id="L1146"><span class="ln">1146</span>        } <span class="c">// position</span>
+</code><code id="L1147"><span class="ln">1147</span>        
+</code><code id="L1148"><span class="ln">1148</span>        <b>return</b> {
+</code><code id="L1149"><span class="ln">1149</span>            create: create,
+</code><code id="L1150"><span class="ln">1150</span>            position: position
+</code><code id="L1151"><span class="ln">1151</span>        };
+</code><code id="L1152"><span class="ln">1152</span>    })();
+</code><code id="L1153"><span class="ln">1153</span>
+</code><code id="L1154"><span class="ln">1154</span>    
+</code><code id="L1155"><span class="ln">1155</span><span class="c">    <span class="c"><span class="c">/* internals</span> */</span></span>
+</code><code id="L1156"><span class="ln">1156</span>    
+</code><code id="L1157"><span class="ln">1157</span>    <b>var</b> _classMC<span class="s"> = </span><i>'mc-controls'</i>,
+</code><code id="L1158"><span class="ln">1158</span>        _registry<span class="s"> = </span>{};
+</code><code id="L1159"><span class="ln">1159</span>    
+</code><code id="L1160"><span class="ln">1160</span>    <b>function</b> getControlsLayer(target) {
+</code><code id="L1161"><span class="ln">1161</span>        <span class="c">// look <b>for</b> a controls layer within the target</span>
+</code><code id="L1162"><span class="ln">1162</span>        <b>var</b> results<span class="s"> = </span>target.getElementsByClassName(_classMC),
+</code><code id="L1163"><span class="ln">1163</span>            controlLayer<span class="s"> = </span>results[<span class="d">0</span>];
+</code><code id="L1164"><span class="ln">1164</span>
+</code><code id="L1165"><span class="ln">1165</span>        <span class="c">// <b>if</b> we don't have a control layer, then create one</span>
+</code><code id="L1166"><span class="ln">1166</span>        <b>if</b> (! controlLayer) {
+</code><code id="L1167"><span class="ln">1167</span>            <b>var</b> targetBounds<span class="s"> = </span>target.getBoundingClientRect();
+</code><code id="L1168"><span class="ln">1168</span>            
+</code><code id="L1169"><span class="ln">1169</span>            controlLayer<span class="s"> = </span>_dom.create(<i>'div'</i>, { className: _classMC }, {
+</code><code id="L1170"><span class="ln">1170</span>                position: <i>'absolute'</i>,
+</code><code id="L1171"><span class="ln">1171</span>                width: targetBounds.width<span class="s"> + </span><i>'px'</i>,
+</code><code id="L1172"><span class="ln">1172</span>                height: targetBounds.height<span class="s"> + </span><i>'px'</i>,
+</code><code id="L1173"><span class="ln">1173</span>                <i>'z-index'</i>: <span class="d">1000</span>
+</code><code id="L1174"><span class="ln">1174</span>            });
+</code><code id="L1175"><span class="ln">1175</span>            
+</code><code id="L1176"><span class="ln">1176</span>            <span class="c">// add to the target</span>
+</code><code id="L1177"><span class="ln">1177</span>            target.appendChild(controlLayer);
+</code><code id="L1178"><span class="ln">1178</span>        } <span class="c">// <b>if</b></span>
+</code><code id="L1179"><span class="ln">1179</span>
+</code><code id="L1180"><span class="ln">1180</span>        <b>return</b> controlLayer;
+</code><code id="L1181"><span class="ln">1181</span>    } <span class="c">// getControlsLayer</span>
+</code><code id="L1182"><span class="ln">1182</span>    
+</code><code id="L1183"><span class="ln">1183</span>    <b>function</b> positionControl(target, control, opts) {
+</code><code id="L1184"><span class="ln">1184</span>        <span class="c">// <b>if</b> we have a control that wants to display full size, then match the container size</span>
+</code><code id="L1185"><span class="ln">1185</span>        <b>if</b> (opts.fullsize) {
+</code><code id="L1186"><span class="ln">1186</span>            <b>var</b> rect<span class="s"> = </span>target.getBoundingClientRect();
+</code><code id="L1187"><span class="ln">1187</span>            
+</code><code id="L1188"><span class="ln">1188</span>            control.style.width<span class="s"> = </span>rect.width<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1189"><span class="ln">1189</span>            control.style.height<span class="s"> = </span>rect.height<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1190"><span class="ln">1190</span>            opts.alignment<span class="s"> = </span><i>'top left'</i>;
+</code><code id="L1191"><span class="ln">1191</span>        }
+</code><code id="L1192"><span class="ln">1192</span>        
+</code><code id="L1193"><span class="ln">1193</span>        control.style[<i>'z-index'</i>]<span class="s"> = </span><span class="d">1000</span>;
+</code><code id="L1194"><span class="ln">1194</span>        _dom.position(control, opts.alignment);
+</code><code id="L1195"><span class="ln">1195</span>    } <span class="c">// positionControl</span>
+</code><code id="L1196"><span class="ln">1196</span>    
+</code><code id="L1197"><span class="ln">1197</span><span class="c">    <span class="c"><span class="c">/* exports</span> */</span></span>
+</code><code id="L1198"><span class="ln">1198</span>    
+</code><code id="L1199"><span class="ln">1199</span><span class="c">    <span class="c">/*\</span>
+</span></code><code id="L1200"><span class="ln">1200</span><span class="c">    <span class="s"> * </span>MapControls.add
+</span></code><code id="L1201"><span class="ln">1201</span><span class="c">     [ <b>function</b> ]
+</span></code><code id="L1202"><span class="ln">1202</span><span class="c">     **
+</span></code><code id="L1203"><span class="ln">1203</span><span class="c">    <span class="s"> * </span>Add a <b>new</b> control of `controlType` to the specified `target` element.
+</span></code><code id="L1204"><span class="ln">1204</span><span class="c">     **
+</span></code><code id="L1205"><span class="ln">1205</span><span class="c">     > Arguments
+</span></code><code id="L1206"><span class="ln">1206</span><span class="c">     **
+</span></code><code id="L1207"><span class="ln">1207</span><span class="c">    <span class="s"> - </span>target (DOMElement) the element that the control will be added to
+</span></code><code id="L1208"><span class="ln">1208</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control we are creating
+</span></code><code id="L1209"><span class="ln">1209</span><span class="c">    <span class="s"> - </span>opts (object) options that will be passed onto the control
+</span></code><code id="L1210"><span class="ln">1210</span><span class="c">     **
+</span></code><code id="L1211"><span class="ln">1211</span><span class="c">    <span class="s"> = </span>(DOMElement) the dom element that contains the newly created control
+</span></code><code id="L1212"><span class="ln">1212</span><span class="c">     **
+</span></code><code id="L1213"><span class="ln">1213</span><span class="c">     > Options
+</span></code><code id="L1214"><span class="ln">1214</span><span class="c">     **
+</span></code><code id="L1215"><span class="ln">1215</span><span class="c">    <span class="s"> * </span>The following options are supported by most controls
+</span></code><code id="L1216"><span class="ln">1216</span><span class="c">     **
+</span></code><code id="L1217"><span class="ln">1217</span><span class="c">    <span class="s"> - </span>aggressiveCapture (<b>boolean</b>) whether or not Interact will prevent <b>default</b> events from firing after intercepting events
+</span></code><code id="L1218"><span class="ln">1218</span><span class="c">    \*/</span>
+</code><code id="L1219"><span class="ln">1219</span>    <b>function</b> add(target, controlType, opts) {
+</code><code id="L1220"><span class="ln">1220</span>        <span class="c">// ensure the options have been defined</span>
+</code><code id="L1221"><span class="ln">1221</span>        <span class="c">// (we pass these by reference)</span>
+</code><code id="L1222"><span class="ln">1222</span>        opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L1223"><span class="ln">1223</span>        
+</code><code id="L1224"><span class="ln">1224</span>        <span class="c">// get the control</span>
+</code><code id="L1225"><span class="ln">1225</span>        <b>var</b> control<span class="s"> = </span>get(controlType, opts);
+</code><code id="L1226"><span class="ln">1226</span>        <b>if</b> (control) {
+</code><code id="L1227"><span class="ln">1227</span>            <span class="c">// add the control to the target</span>
+</code><code id="L1228"><span class="ln">1228</span>            target.appendChild(control);
+</code><code id="L1229"><span class="ln">1229</span>            
+</code><code id="L1230"><span class="ln">1230</span>            <span class="c">// position the control</span>
+</code><code id="L1231"><span class="ln">1231</span>            positionControl(target, control, opts);
+</code><code id="L1232"><span class="ln">1232</span>        }
+</code><code id="L1233"><span class="ln">1233</span>        
+</code><code id="L1234"><span class="ln">1234</span>        <b>return</b> control;
+</code><code id="L1235"><span class="ln">1235</span>    } <span class="c">// add</span>
+</code><code id="L1236"><span class="ln">1236</span>    
+</code><code id="L1237"><span class="ln">1237</span><span class="c">    <span class="c">/*\</span>
+</span></code><code id="L1238"><span class="ln">1238</span><span class="c">    <span class="s"> * </span>MapControls.get
+</span></code><code id="L1239"><span class="ln">1239</span><span class="c">     [ <b>function</b> ]
+</span></code><code id="L1240"><span class="ln">1240</span><span class="c">     **
+</span></code><code id="L1241"><span class="ln">1241</span><span class="c">    <span class="s"> * </span>Create a <b>new</b> control of `controlType`
+</span></code><code id="L1242"><span class="ln">1242</span><span class="c">     **
+</span></code><code id="L1243"><span class="ln">1243</span><span class="c">     > Arguments
+</span></code><code id="L1244"><span class="ln">1244</span><span class="c">     **
+</span></code><code id="L1245"><span class="ln">1245</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control we are creating
+</span></code><code id="L1246"><span class="ln">1246</span><span class="c">    <span class="s"> - </span>opts (object) options that will be passed onto the control
+</span></code><code id="L1247"><span class="ln">1247</span><span class="c">     **
+</span></code><code id="L1248"><span class="ln">1248</span><span class="c">    <span class="s"> = </span>(DOMElement) the dom element that contains the newly created control
+</span></code><code id="L1249"><span class="ln">1249</span><span class="c">     **
+</span></code><code id="L1250"><span class="ln">1250</span><span class="c">     > Options
+</span></code><code id="L1251"><span class="ln">1251</span><span class="c">     **
+</span></code><code id="L1252"><span class="ln">1252</span><span class="c">    <span class="s"> * </span>As per @MapControls.add
+</span></code><code id="L1253"><span class="ln">1253</span><span class="c">    \*/</span>
+</code><code id="L1254"><span class="ln">1254</span>    <b>function</b> get(controlType, opts) {
+</code><code id="L1255"><span class="ln">1255</span>        <b>var</b> creator<span class="s"> = </span>_registry[controlType];
+</code><code id="L1256"><span class="ln">1256</span>        <b>if</b> (creator) {
+</code><code id="L1257"><span class="ln">1257</span>            <b>return</b> creator.call(creator, opts);
+</code><code id="L1258"><span class="ln">1258</span>        }
+</code><code id="L1259"><span class="ln">1259</span>    } <span class="c">// get</span>
+</code><code id="L1260"><span class="ln">1260</span>    
+</code><code id="L1261"><span class="ln">1261</span><span class="c">    <span class="c">/*\</span>
+</span></code><code id="L1262"><span class="ln">1262</span><span class="c">    <span class="s"> * </span>MapControls.register
+</span></code><code id="L1263"><span class="ln">1263</span><span class="c">     [ <b>function</b> ]
+</span></code><code id="L1264"><span class="ln">1264</span><span class="c">     **
+</span></code><code id="L1265"><span class="ln">1265</span><span class="c">    <span class="s"> * </span>Register a <b>new</b> map control creator
+</span></code><code id="L1266"><span class="ln">1266</span><span class="c">     **
+</span></code><code id="L1267"><span class="ln">1267</span><span class="c">     > Arguments
+</span></code><code id="L1268"><span class="ln">1268</span><span class="c">     **
+</span></code><code id="L1269"><span class="ln">1269</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control being registered
+</span></code><code id="L1270"><span class="ln">1270</span><span class="c">    <span class="s"> - </span>creator (<b>function</b>) the creator <b>function</b> called when a <b>new</b> control is requested
+</span></code><code id="L1271"><span class="ln">1271</span><span class="c">    \*/</span>
+</code><code id="L1272"><span class="ln">1272</span>    <b>function</b> register(controlType, creator) {
+</code><code id="L1273"><span class="ln">1273</span>        <span class="c">// register the control creator</span>
+</code><code id="L1274"><span class="ln">1274</span>        _registry[controlType]<span class="s"> = </span>creator;
+</code><code id="L1275"><span class="ln">1275</span>    } <span class="c">// register</span>
+</code><code id="L1276"><span class="ln">1276</span>    
+</code><code id="L1277"><span class="ln">1277</span>    <b>return</b> {
+</code><code id="L1278"><span class="ln">1278</span>        _createEl: _dom.create,
+</code><code id="L1279"><span class="ln">1279</span>        
+</code><code id="L1280"><span class="ln">1280</span>        add: add,
+</code><code id="L1281"><span class="ln">1281</span>        get: get,
+</code><code id="L1282"><span class="ln">1282</span>        register: register
+</code><code id="L1283"><span class="ln">1283</span>    };
+</code><code id="L1284"><span class="ln">1284</span>})();
+</code></body></html>

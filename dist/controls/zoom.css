@@ -1,0 +1,22 @@
+.mc-zoom {
+  background: url("../images/zoom.png");
+  width: 24px;
+  height: 200px;
+}
+.mc-zoom-btn {
+  height: 14px;
+  margin: 1px 0;
+}
+.mc-zoom-btn-in {
+  background: url("../images/zoom.png") 0 -248px no-repeat;
+}
+.mc-zoom-btn-out {
+  background: url("../images/zoom.png") 0 -296px no-repeat;
+}
+.mc-zoom-slider {
+  height: 166px;
+}
+.mc-zoom-thumb {
+  height: 16px;
+  background: url("../images/zoom.png") 0 -200px no-repeat;
+}

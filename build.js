@@ -4,6 +4,7 @@ var interleave = require('interleave'),
     config = {
         aliases: {
             'cog': 'github://DamonOehlman/cog/cogs/$1',
+            'interact': 'github://DamonOehlman/interact/interact.js',
             'eve': 'github://DmitryBaranovskiy/eve/eve.js'
         }
     };

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!-- Generated with Dr.js -->
+<html lang="en"><head><meta charset="utf-8"><title> Reference</title><link rel="stylesheet" href="dr.css"></head><body id="dr-js"><div id="dr"><ol class="dr-toc"><li class="dr-lvl0"><a href="#Interact" class="undefined"><span>Interact</span></a></li><li class="dr-lvl1"><a href="#Interact.register" class="dr-function"><span>Interact.register</span></a></li><li class="dr-lvl1"><a href="#Interact.watch" class="dr-function"><span>Interact.watch</span></a></li><li class="dr-lvl0"><a href="#MapControls" class="undefined"><span>MapControls</span></a></li><li class="dr-lvl1"><a href="#MapControls.add" class="dr-function"><span>MapControls.add</span></a></li><li class="dr-lvl1"><a href="#MapControls.get" class="dr-function"><span>MapControls.get</span></a></li><li class="dr-lvl1"><a href="#MapControls.register" class="dr-function"><span>MapControls.register</span></a></li><li class="dr-lvl0"><a href="#eve" class="dr-method"><span>eve()</span></a></li><li class="dr-lvl1"><a href="#eve.listeners" class="dr-method"><span>eve.listeners()</span></a></li><li class="dr-lvl1"><a href="#eve.nt" class="dr-method"><span>eve.nt()</span></a></li><li class="dr-lvl1"><a href="#eve.on" class="dr-method"><span>eve.on()</span></a></li><li class="dr-lvl1"><a href="#eve.stop" class="dr-method"><span>eve.stop()</span></a></li><li class="dr-lvl1"><a href="#eve.unbind" class="dr-method"><span>eve.unbind()</span></a></li><li class="dr-lvl1"><a href="#eve.version" class="dr-property"><span>eve.version</span></a></li></ol><div class="dr-doc"><h1> Reference</h1><p class="dr-source">Check out the source: <a href="mapcontrols-src.html">mapcontrols.js</a></p><h2 id="Interact" class="undefined"><i class="dr-trixie">&#160;</i>Interact<a href="#Interact" title="Link to this section" class="dr-hash">&#x2693;</a></h2>
+<h3 id="Interact.register" class="dr-function"><i class="dr-trixie">&#160;</i>Interact.register<a href="#Interact.register" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 368 in the source" href="mapcontrols-src.html#L368">&#x27ad;</a></h3>
+<div class="dr-function"><p>Register an interaction handler
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">typeName</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">the name of the interaction handler being registered</dd>
+<dt class="dr-param">opts</dt>
+<dd class="dr-type"><em class="dr-type-object">object</em></dd>
+<dd class="dr-description">an object containing options for the new interactor</dd>
+</dl>
+</div><h3 id="Interact.watch" class="dr-function"><i class="dr-trixie">&#160;</i>Interact.watch<a href="#Interact.watch" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 389 in the source" href="mapcontrols-src.html#L389">&#x27ad;</a></h3>
+<div class="dr-function"><p>Watch a particular DOM element for interaction events
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">target</dt>
+<dd class="dr-type"><em class="dr-type-DOMElement">DOMElement</em></dd>
+<dd class="dr-description">the element in the DOM to monitor for events</dd>
+<dt class="dr-param">opts</dt>
+<dd class="dr-type"><em class="dr-type-object">object</em></dd>
+<dd class="dr-description">any specific capture options</dd>
+<dt class="dr-param">caps</dt>
+<dd class="dr-type"><em class="dr-type-object">object</em></dd>
+<dd class="dr-description">device capability overrides</dd>
+</dl>
+</div><h2 id="MapControls" class="undefined"><i class="dr-trixie">&#160;</i>MapControls<a href="#MapControls" title="Link to this section" class="dr-hash">&#x2693;</a></h2>
+<h3 id="MapControls.add" class="dr-function"><i class="dr-trixie">&#160;</i>MapControls.add<a href="#MapControls.add" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 1219 in the source" href="mapcontrols-src.html#L1219">&#x27ad;</a></h3>
+<div class="dr-function"><p>Add a new control of <code>controlType</code> to the specified <code>target</code> element.
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">target</dt>
+<dd class="dr-type"><em class="dr-type-DOMElement">DOMElement</em></dd>
+<dd class="dr-description">the element that the control will be added to</dd>
+<dt class="dr-param">controlType</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">the type of control we are creating</dd>
+<dt class="dr-param">opts</dt>
+<dd class="dr-type"><em class="dr-type-object">object</em></dd>
+<dd class="dr-description">options that will be passed onto the control</dd>
+</dl>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-DOMElement">DOMElement</em> <span class="dr-description">the dom element that contains the newly created control</span></p>
+<p class="header">Options
+<p>The following options are supported by most controls
+</p>
+<dl class="dr-parameters"><dt class="dr-param">aggressiveCapture</dt>
+<dd class="dr-type"><em class="dr-type-boolean">boolean</em></dd>
+<dd class="dr-description">whether or not Interact will prevent default events from firing after intercepting events</dd>
+</dl>
+</div><h3 id="MapControls.get" class="dr-function"><i class="dr-trixie">&#160;</i>MapControls.get<a href="#MapControls.get" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 1254 in the source" href="mapcontrols-src.html#L1254">&#x27ad;</a></h3>
+<div class="dr-function"><p>Create a new control of <code>controlType</code>
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">controlType</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">the type of control we are creating</dd>
+<dt class="dr-param">opts</dt>
+<dd class="dr-type"><em class="dr-type-object">object</em></dd>
+<dd class="dr-description">options that will be passed onto the control</dd>
+</dl>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-DOMElement">DOMElement</em> <span class="dr-description">the dom element that contains the newly created control</span></p>
+<p class="header">Options
+<p>As per <a href="#MapControls.add" class="dr-link">MapControls.add</a>
+</p>
+</div><h3 id="MapControls.register" class="dr-function"><i class="dr-trixie">&#160;</i>MapControls.register<a href="#MapControls.register" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 1272 in the source" href="mapcontrols-src.html#L1272">&#x27ad;</a></h3>
+<div class="dr-function"><p>Register a new map control creator
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">controlType</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">the type of control being registered</dd>
+<dt class="dr-param">creator</dt>
+<dd class="dr-type"><em class="dr-type-function">function</em></dd>
+<dd class="dr-description">the creator function called when a new control is requested</dd>
+</dl>
+</div><h2 id="eve" class="dr-method"><i class="dr-trixie">&#160;</i>eve(name, scope, varargs)<a href="#eve" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 35 in the source" href="mapcontrols-src.html#L35">&#x27ad;</a></h2>
+<div class="dr-method"><p>Fires event with given <code>name</code>, given scope and other parameters.
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">name</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">name of the event, dot (<code>.</code>) or slash (<code>/</code>) separated</dd>
+<dt class="dr-param">scope</dt>
+<dd class="dr-type"><em class="dr-type-object">object</em></dd>
+<dd class="dr-description">context for the event handlers</dd>
+<dt class="dr-param">varargs</dt>
+<dd class="dr-type"><em class="dr-type-...">...</em></dd>
+<dd class="dr-description">the rest of arguments will be sent to event handlers</dd>
+</dl>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-object">object</em> <span class="dr-description">array of returned values from the listeners</span></p>
+</div><h3 id="eve.listeners" class="dr-method"><i class="dr-trixie">&#160;</i>eve.listeners(name)<a href="#eve.listeners" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 108 in the source" href="mapcontrols-src.html#L108">&#x27ad;</a></h3>
+<div class="dr-method"><p>Internal method which gives you array of all event handlers that will be triggered by the given <code>name</code>.
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">name</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">name of the event, dot (<code>.</code>) or slash (<code>/</code>) separated</dd>
+</dl>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-array">array</em> <span class="dr-description">array of event handlers</span></p>
+</div><h3 id="eve.nt" class="dr-method"><i class="dr-trixie">&#160;</i>eve.nt([subname])<a href="#eve.nt" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 205 in the source" href="mapcontrols-src.html#L205">&#x27ad;</a></h3>
+<div class="dr-method"><p>Could be used inside event handler to figure out actual name of the event.
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param optional">subname</dt>
+<dd class="dr-optional">optional</dd>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">subname of the event</dd>
+</dl>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-string">string</em> <span class="dr-description">name of the event, if <code>subname</code> is not specified</span></p>
+<p>or
+</p>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-boolean">boolean</em> <span class="dr-description"><code>true</code>, if current event’s name contains <code>subname</code></span></p>
+</div><h3 id="eve.on" class="dr-method"><i class="dr-trixie">&#160;</i>eve.on(name, f)<a href="#eve.on" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 163 in the source" href="mapcontrols-src.html#L163">&#x27ad;</a></h3>
+<div class="dr-method"><p>Binds given event handler with a given name. You can use wildcards “<code>*</code>” for the names:
+</p>
+<pre class="javascript code"><code>eve.on(<i>"*.under.*"</i>, f);
+eve(<i>"mouse.under.floor"</i>); <span class="c">// triggers f</span>
+</code></pre>
+<p>Use <a href="#eve" class="dr-link">eve</a> to trigger the listener.
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">name</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">name of the event, dot (<code>.</code>) or slash (<code>/</code>) separated, with optional wildcards</dd>
+<dt class="dr-param">f</dt>
+<dd class="dr-type"><em class="dr-type-function">function</em></dd>
+<dd class="dr-description">event handler function</dd>
+</dl>
+<p class="dr-returns"><strong class="dr-title">Returns:</strong> <em class="dr-type-function">function</em> <span class="dr-description">returned function accept one number parameter that represents z-index of the handler. It is optional feature and only used when you need to ensure that some subset of handlers will be invoked in a given order, despite of the order of assignment. </span></p>
+<p class="header">Example:
+</p>
+<pre class="javascript code"><code>eve.on(<i>"mouse"</i>, eat)(<span class="d">2</span>);
+eve.on(<i>"mouse"</i>, scream);
+eve.on(<i>"mouse"</i>, <b>catch</b>)(<span class="d">1</span>);
+</code></pre>
+<p>This will ensure that <code>catch</code> function will be called before <code>eat</code>.
+If you want to put you hadler before not indexed handlers specify negative value.
+Note: I assume most of the time you don’t need to worry about z-index, but it’s nice to have this feature “just in case”.
+</p>
+</div><h3 id="eve.stop" class="dr-method"><i class="dr-trixie">&#160;</i>eve.stop()<a href="#eve.stop" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 188 in the source" href="mapcontrols-src.html#L188">&#x27ad;</a></h3>
+<div class="dr-method"><p>Is used inside event handler to stop event
+</p>
+</div><h3 id="eve.unbind" class="dr-method"><i class="dr-trixie">&#160;</i>eve.unbind(name, f)<a href="#eve.unbind" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 222 in the source" href="mapcontrols-src.html#L222">&#x27ad;</a></h3>
+<div class="dr-method"><p>Removes given function from the list of event listeners assigned to given name.
+</p>
+<p class="header">Arguments
+</p>
+<dl class="dr-parameters"><dt class="dr-param">name</dt>
+<dd class="dr-type"><em class="dr-type-string">string</em></dd>
+<dd class="dr-description">name of the event, dot (<code>.</code>) or slash (<code>/</code>) separated, with optional wildcards</dd>
+<dt class="dr-param">f</dt>
+<dd class="dr-type"><em class="dr-type-function">function</em></dd>
+<dd class="dr-description">event handler function</dd>
+</dl>
+</div><h3 id="eve.version" class="dr-property"><i class="dr-trixie">&#160;</i>eve.version<a href="#eve.version" title="Link to this section" class="dr-hash">&#x2693;</a><a class="dr-sourceline" title="Go to line 279 in the source" href="mapcontrols-src.html#L279">&#x27ad;</a></h3>
+<div class="dr-property"><em class="dr-type dr-type-string">string</em><p>Current version of the library.
+</p>
+</div></div></div></body></html>

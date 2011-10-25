@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<!-- Generated with Dr.js -->
+<html lang="en"><head><meta charset="utf-8"><title>zoom.js</title><link rel="stylesheet" href="dr.css"></head><body id="src-dr-js"><code id="L1"><span class="ln">1</span><span class="c"><span class="c">/*\</span>
+</span></code><code id="L2"><span class="ln">2</span><span class="c">* zoom
+</span></code><code id="L3"><span class="ln">3</span><span class="c">[ control ]
+</span></code><code id="L4"><span class="ln">4</span><span class="c">**
+</span></code><code id="L5"><span class="ln">5</span><span class="c">* Fires event <b>with</b> given `name`, given scope and other parameters.
+</span></code><code id="L6"><span class="ln">6</span><span class="c">**
+</span></code><code id="L7"><span class="ln">7</span><span class="c">> Arguments
+</span></code><code id="L8"><span class="ln">8</span><span class="c">**
+</span></code><code id="L9"><span class="ln">9</span><span class="c">- name (string) name of the event, dot (`.`) or slash (`/`) separated
+</span></code><code id="L10"><span class="ln">10</span><span class="c">- scope (object) context <b>for</b> the event handlers
+</span></code><code id="L11"><span class="ln">11</span><span class="c">- varargs (...) the rest of arguments will be sent to event handlers
+</span></code><code id="L12"><span class="ln">12</span><span class="c">**
+</span></code><code id="L13"><span class="ln">13</span><span class="c">= (object) array of returned values from the listeners
+</span></code><code id="L14"><span class="ln">14</span><span class="c">\*/</span>
+</code><code id="L15"><span class="ln">15</span>MapControls.register(<i>'zoom'</i>, <b>function</b>(opts) {
+</code><code id="L16"><span class="ln">16</span>    <span class="c">// initialise <b>default</b> options</span>
+</code><code id="L17"><span class="ln">17</span>    opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L18"><span class="ln">18</span>    opts.width<span class="s"> = </span>opts.width<span class="s"> || </span><span class="d">24</span>;
+</code><code id="L19"><span class="ln">19</span>    opts.height<span class="s"> = </span>opts.height<span class="s"> || </span><span class="d">200</span>;
+</code><code id="L20"><span class="ln">20</span>    opts.className<span class="s"> = </span>opts.className<span class="s"> || </span><i>'mc-zoom'</i>;
+</code><code id="L21"><span class="ln">21</span>    opts.alignment<span class="s"> = </span>opts.alignment<span class="s"> || </span><i>'right-<span class="d">10</span> top+<span class="d">10</span>'</i>;
+</code><code id="L22"><span class="ln">22</span>    
+</code><code id="L23"><span class="ln">23</span>    <b>function</b> genClasses() {
+</code><code id="L24"><span class="ln">24</span>        <b>var</b> output<span class="s"> = </span>[];
+</code><code id="L25"><span class="ln">25</span>        <b>for</b> (<b>var</b> ii<span class="s"> = </span><span class="d">0</span>; ii &lt; arguments.length; ii++) {
+</code><code id="L26"><span class="ln">26</span>            output.push(opts.className<span class="s"> + </span><i>'-'</i><span class="s"> + </span>arguments[ii]);
+</code><code id="L27"><span class="ln">27</span>        }
+</code><code id="L28"><span class="ln">28</span>        
+</code><code id="L29"><span class="ln">29</span>        <b>return</b> output.join(<i>' '</i>);
+</code><code id="L30"><span class="ln">30</span>    } <span class="c">// genClasses</span>
+</code><code id="L31"><span class="ln">31</span>
+</code><code id="L32"><span class="ln">32</span>    <span class="c">// initialise the zoombar element</span>
+</code><code id="L33"><span class="ln">33</span>    <b>var</b> id<span class="s"> = </span><i>'zoombar_'</i><span class="s"> + </span><b>new</b> Date().getTime(),
+</code><code id="L34"><span class="ln">34</span>        zoombar<span class="s"> = </span>MapControls._createEl(<i>'div'</i>, { 
+</code><code id="L35"><span class="ln">35</span>            id: id,
+</code><code id="L36"><span class="ln">36</span>            className: opts.className 
+</code><code id="L37"><span class="ln">37</span>        });
+</code><code id="L38"><span class="ln">38</span>    
+</code><code id="L39"><span class="ln">39</span>    <span class="c">// add the zoom out button</span>
+</code><code id="L40"><span class="ln">40</span>    zoombar.appendChild(MapControls._createEl(<i>'div'</i>, {
+</code><code id="L41"><span class="ln">41</span>        className: genClasses(<i>'btn'</i>, <i>'btn-out'</i>)
+</code><code id="L42"><span class="ln">42</span>    }));
+</code><code id="L43"><span class="ln">43</span>
+</code><code id="L44"><span class="ln">44</span>    <span class="c">// add the thumb</span>
+</code><code id="L45"><span class="ln">45</span>    zoombar.appendChild(MapControls._createEl(<i>'div'</i>, {
+</code><code id="L46"><span class="ln">46</span>        className: genClasses(<i>'thumb'</i>)
+</code><code id="L47"><span class="ln">47</span>    }));
+</code><code id="L48"><span class="ln">48</span>    
+</code><code id="L49"><span class="ln">49</span>    <span class="c">// add the zoom <b>in</b> button</span>
+</code><code id="L50"><span class="ln">50</span>    zoombar.appendChild(MapControls._createEl(<i>'div'</i>, {
+</code><code id="L51"><span class="ln">51</span>        className: genClasses(<i>'btn'</i>, <i>'btn-<b>in</b>'</i>)
+</code><code id="L52"><span class="ln">52</span>    }));
+</code><code id="L53"><span class="ln">53</span>    
+</code><code id="L54"><span class="ln">54</span>    INTERACT.watch(zoombar);
+</code><code id="L55"><span class="ln">55</span>    eve.on(<i>'interact.pointer.move.'</i><span class="s"> + </span>id, <b>function</b>(evt) {
+</code><code id="L56"><span class="ln">56</span>        <span class="c">// TODO: ask interact to <b>do</b> <b>this</b> on our behalf</span>
+</code><code id="L57"><span class="ln">57</span>        evt.preventDefault();
+</code><code id="L58"><span class="ln">58</span>        evt.stopPropagation();
+</code><code id="L59"><span class="ln">59</span>        evt.stopImmediatePropagation();
+</code><code id="L60"><span class="ln">60</span>    });
+</code><code id="L61"><span class="ln">61</span>    
+</code><code id="L62"><span class="ln">62</span>    <span class="c">// <b>return</b> the zoombar</span>
+</code><code id="L63"><span class="ln">63</span>    <b>return</b> zoombar;
+</code><code id="L64"><span class="ln">64</span>});
+</code><code id="L65"><span class="ln">65</span>
+</code><code id="L66"><span class="ln">66</span>
+</code><code id="L67"><span class="ln">67</span><span class="c"><span class="c">/**</span>
+</span></code><code id="L68"><span class="ln">68</span><span class="c"># CONTROL: Zoombar
+</span></code><code id="L69"><span class="ln">69</span><span class="c">reg(<i>'control'</i>, <i>'zoombar'</i>, <b>function</b>(view, panFrame, container, params) {
+</span></code><code id="L70"><span class="ln">70</span><span class="c">    params<span class="s"> = </span>_extend({
+</span></code><code id="L71"><span class="ln">71</span><span class="c">        width: <span class="d">24</span>,
+</span></code><code id="L72"><span class="ln">72</span><span class="c">        height: <span class="d">200</span>,
+</span></code><code id="L73"><span class="ln">73</span><span class="c">        images: <i>'img/zoom.png'</i>,
+</span></code><code id="L74"><span class="ln">74</span><span class="c">        align: <i>'right'</i>,
+</span></code><code id="L75"><span class="ln">75</span><span class="c">        marginTop: <span class="d">10</span>,
+</span></code><code id="L76"><span class="ln">76</span><span class="c">        spacing: <span class="d">10</span>,
+</span></code><code id="L77"><span class="ln">77</span><span class="c">        thumbHeight: <span class="d">16</span>,
+</span></code><code id="L78"><span class="ln">78</span><span class="c">        buttonHeight: <span class="d">16</span>
+</span></code><code id="L79"><span class="ln">79</span><span class="c">    }, params);
+</span></code><code id="L80"><span class="ln">80</span><span class="c">    
+</span></code><code id="L81"><span class="ln">81</span><span class="c">    <b>var</b> STATE_STATIC<span class="s"> = </span><span class="d">0</span>,
+</span></code><code id="L82"><span class="ln">82</span><span class="c">        STATE_HOVER<span class="s"> = </span><span class="d">1</span>,
+</span></code><code id="L83"><span class="ln">83</span><span class="c">        STATE_DOWN<span class="s"> = </span><span class="d">2</span>,
+</span></code><code id="L84"><span class="ln">84</span><span class="c">        buttonHeight<span class="s"> = </span>params.buttonHeight,
+</span></code><code id="L85"><span class="ln">85</span><span class="c">        eventMonitor,
+</span></code><code id="L86"><span class="ln">86</span><span class="c">        spriteStart<span class="s"> = </span>params.height,
+</span></code><code id="L87"><span class="ln">87</span><span class="c">        thumb,
+</span></code><code id="L88"><span class="ln">88</span><span class="c">        thumbHeight<span class="s"> = </span>params.thumbHeight,
+</span></code><code id="L89"><span class="ln">89</span><span class="c">        thumbMin<span class="s"> = </span>params.spacing<span class="s"> + </span>buttonHeight<span class="s"> - </span>(thumbHeight >> <span class="d">1</span>),
+</span></code><code id="L90"><span class="ln">90</span><span class="c">        thumbMax<span class="s"> = </span>params.height<span class="s"> - </span>buttonHeight<span class="s"> - </span>(thumbHeight >> <span class="d">1</span>),
+</span></code><code id="L91"><span class="ln">91</span><span class="c">        thumbPos<span class="s"> = </span>thumbMin,
+</span></code><code id="L92"><span class="ln">92</span><span class="c">        thumbVal<span class="s"> = </span>-<span class="d">1</span>,
+</span></code><code id="L93"><span class="ln">93</span><span class="c">        thumbResetTimeout<span class="s"> = </span><span class="d">0</span>,
+</span></code><code id="L94"><span class="ln">94</span><span class="c">        zoomMin<span class="s"> = </span>view.minZoom(),
+</span></code><code id="L95"><span class="ln">95</span><span class="c">        zoomMax<span class="s"> = </span>view.maxZoom(),
+</span></code><code id="L96"><span class="ln">96</span><span class="c">        zoomSteps<span class="s"> = </span>zoomMax<span class="s"> - </span>zoomMin<span class="s"> + </span><span class="d">1</span>,
+</span></code><code id="L97"><span class="ln">97</span><span class="c">        zoomStepSpacing<span class="s"> = </span>(thumbMax<span class="s"> - </span>thumbMin)<span class="s"> / </span>zoomSteps<span class="s"> | </span><span class="d">0</span>,
+</span></code><code id="L98"><span class="ln">98</span><span class="c">        buttons<span class="s"> = </span>[],
+</span></code><code id="L99"><span class="ln">99</span><span class="c">        zoomBar,
+</span></code><code id="L100"><span class="ln">100</span><span class="c">        zoomTimeout<span class="s"> = </span><span class="d">0</span>,
+</span></code><code id="L101"><span class="ln">101</span><span class="c">        tapHandlers<span class="s"> = </span>{
+</span></code><code id="L102"><span class="ln">102</span><span class="c">            button0: <b>function</b>() {
+</span></code><code id="L103"><span class="ln">103</span><span class="c">                view.zoom(view.zoom()<span class="s"> + </span><span class="d">1</span>);
+</span></code><code id="L104"><span class="ln">104</span><span class="c">            },
+</span></code><code id="L105"><span class="ln">105</span><span class="c">            
+</span></code><code id="L106"><span class="ln">106</span><span class="c">            button1: <b>function</b>() {
+</span></code><code id="L107"><span class="ln">107</span><span class="c">                view.zoom(view.zoom()<span class="s"> - </span><span class="d">1</span>);
+</span></code><code id="L108"><span class="ln">108</span><span class="c">            }
+</span></code><code id="L109"><span class="ln">109</span><span class="c">        };
+</span></code><code id="L110"><span class="ln">110</span><span class="c">        
+</span></code><code id="L111"><span class="ln">111</span><span class="c">    <b>function</b> bindEvents() {
+</span></code><code id="L112"><span class="ln">112</span><span class="c">        <span class="c">// attach the event monitor</span>
+</span></code><code id="L113"><span class="ln">113</span><span class="c">        INTERACT.watch(zoomBar, {
+</span></code><code id="L114"><span class="ln">114</span><span class="c">            bindTarget: zoomBar
+</span></code><code id="L115"><span class="ln">115</span><span class="c">        });
+</span></code><code id="L116"><span class="ln">116</span><span class="c">        
+</span></code><code id="L117"><span class="ln">117</span><span class="c">        eve.on(<i>'interact.pointer.down.'</i><span class="s"> + </span>zoomBar.id, handlePointerDown);
+</span></code><code id="L118"><span class="ln">118</span><span class="c">        eve.on(<i>'interact.pointer.move.'</i><span class="s"> + </span>zoomBar.id, handlePointerMove);
+</span></code><code id="L119"><span class="ln">119</span><span class="c">        eve.on(<i>'interact.pointer.up.'</i><span class="s"> + </span>zoomBar.id, handlePointerUp);
+</span></code><code id="L120"><span class="ln">120</span><span class="c">        eve.on(<i>'interact.tap.'</i><span class="s"> + </span>zoomBar.id, handlePointerTap);
+</span></code><code id="L121"><span class="ln">121</span><span class="c">    } <span class="c">// bindEvents</span>
+</span></code><code id="L122"><span class="ln">122</span><span class="c">    
+</span></code><code id="L123"><span class="ln">123</span><span class="c">    <b>function</b> createButton(btnIndex, marginTop) {
+</span></code><code id="L124"><span class="ln">124</span><span class="c">        <span class="c">// create the zoom <b>in</b> button</span>
+</span></code><code id="L125"><span class="ln">125</span><span class="c">        <b>var</b> button<span class="s"> = </span>buttons[btnIndex]<span class="s"> = </span>DOM.create(<i>'div'</i>, <i>'t5-zoombar-button'</i>, {
+</span></code><code id="L126"><span class="ln">126</span><span class="c">            position: <i>'absolute'</i>,
+</span></code><code id="L127"><span class="ln">127</span><span class="c">            background: getButtonBackground(btnIndex),
+</span></code><code id="L128"><span class="ln">128</span><span class="c">            <i>'z-index'</i>: <span class="d">51</span>,
+</span></code><code id="L129"><span class="ln">129</span><span class="c">            width: params.width<span class="s"> + </span><i>'px'</i>,
+</span></code><code id="L130"><span class="ln">130</span><span class="c">            height: params.buttonHeight<span class="s"> + </span><i>'px'</i>,
+</span></code><code id="L131"><span class="ln">131</span><span class="c">            <i>'margin-top'</i>: (marginTop<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>
+</span></code><code id="L132"><span class="ln">132</span><span class="c">        });
+</span></code><code id="L133"><span class="ln">133</span><span class="c">
+</span></code><code id="L134"><span class="ln">134</span><span class="c">        <span class="c">// add the button to the zoomBar</span>
+</span></code><code id="L135"><span class="ln">135</span><span class="c">        zoomBar.appendChild(button);
+</span></code><code id="L136"><span class="ln">136</span><span class="c">    } <span class="c">// createButton</span>
+</span></code><code id="L137"><span class="ln">137</span><span class="c">        
+</span></code><code id="L138"><span class="ln">138</span><span class="c">    <b>function</b> createThumb() {
+</span></code><code id="L139"><span class="ln">139</span><span class="c">        zoomBar.appendChild(thumb<span class="s"> = </span>DOM.create(<i>'div'</i>, <i>'t5-zoombar-thumb'</i>, {
+</span></code><code id="L140"><span class="ln">140</span><span class="c">            position: <i>'absolute'</i>,
+</span></code><code id="L141"><span class="ln">141</span><span class="c">            background: getThumbBackground(),
+</span></code><code id="L142"><span class="ln">142</span><span class="c">            <i>'z-index'</i>: <span class="d">51</span>,
+</span></code><code id="L143"><span class="ln">143</span><span class="c">            width: params.width<span class="s"> + </span><i>'px'</i>,
+</span></code><code id="L144"><span class="ln">144</span><span class="c">            height: params.thumbHeight<span class="s"> + </span><i>'px'</i>,
+</span></code><code id="L145"><span class="ln">145</span><span class="c">            margin: <i>'10px <span class="d">0</span> <span class="d">0</span> <span class="d">0</span>'</i>,
+</span></code><code id="L146"><span class="ln">146</span><span class="c">            top: (thumbPos<span class="s"> - </span>thumbMin)<span class="s"> + </span><i>'px'</i>
+</span></code><code id="L147"><span class="ln">147</span><span class="c">        }));
+</span></code><code id="L148"><span class="ln">148</span><span class="c">    } <span class="c">// createThumb</span>
+</span></code><code id="L149"><span class="ln">149</span><span class="c">    
+</span></code><code id="L150"><span class="ln">150</span><span class="c">    <b>function</b> createZoomBar() {
+</span></code><code id="L151"><span class="ln">151</span><span class="c">        zoomBar<span class="s"> = </span>DOM.create(<i>'div'</i>, <i>'t5-zoombar'</i>, {
+</span></code><code id="L152"><span class="ln">152</span><span class="c">            id: <i>'zoombar_'</i><span class="s"> + </span>(<b>new</b> Date().getTime()),
+</span></code><code id="L153"><span class="ln">153</span><span class="c">            position: <i>'absolute'</i>,
+</span></code><code id="L154"><span class="ln">154</span><span class="c">            background: getBackground(),
+</span></code><code id="L155"><span class="ln">155</span><span class="c">            <i>'z-index'</i>: <span class="d">50</span>,
+</span></code><code id="L156"><span class="ln">156</span><span class="c">            overflow: <i>'hidden'</i>,
+</span></code><code id="L157"><span class="ln">157</span><span class="c">            width: params.width<span class="s"> + </span><i>'px'</i>,
+</span></code><code id="L158"><span class="ln">158</span><span class="c">            height: params.height<span class="s"> + </span><i>'px'</i>,
+</span></code><code id="L159"><span class="ln">159</span><span class="c">            margin: getMargin()
+</span></code><code id="L160"><span class="ln">160</span><span class="c">        });
+</span></code><code id="L161"><span class="ln">161</span><span class="c">            
+</span></code><code id="L162"><span class="ln">162</span><span class="c">        <span class="c">// add the zoom bar</span>
+</span></code><code id="L163"><span class="ln">163</span><span class="c">        <b>if</b> (container.childNodes[<span class="d">0</span>]) {
+</span></code><code id="L164"><span class="ln">164</span><span class="c">            container.insertBefore(zoomBar, container.childNodes[<span class="d">0</span>]);
+</span></code><code id="L165"><span class="ln">165</span><span class="c">        }
+</span></code><code id="L166"><span class="ln">166</span><span class="c">        <b>else</b> {
+</span></code><code id="L167"><span class="ln">167</span><span class="c">            container.appendChild(zoomBar);
+</span></code><code id="L168"><span class="ln">168</span><span class="c">        } <span class="c">// <b>if</b>..<b>else</b></span>
+</span></code><code id="L169"><span class="ln">169</span><span class="c">        
+</span></code><code id="L170"><span class="ln">170</span><span class="c">        <span class="c">// create the thumb elements</span>
+</span></code><code id="L171"><span class="ln">171</span><span class="c">        createThumb();
+</span></code><code id="L172"><span class="ln">172</span><span class="c">        
+</span></code><code id="L173"><span class="ln">173</span><span class="c">        <span class="c">// create the buttons</span>
+</span></code><code id="L174"><span class="ln">174</span><span class="c">        createButton(<span class="d">0</span>);
+</span></code><code id="L175"><span class="ln">175</span><span class="c">        createButton(<span class="d">1</span>, params.height<span class="s"> - </span>params.buttonHeight);
+</span></code><code id="L176"><span class="ln">176</span><span class="c">        
+</span></code><code id="L177"><span class="ln">177</span><span class="c">        bindEvents();
+</span></code><code id="L178"><span class="ln">178</span><span class="c">    } <span class="c">// createImageContainer</span>
+</span></code><code id="L179"><span class="ln">179</span><span class="c">    
+</span></code><code id="L180"><span class="ln">180</span><span class="c">    <b>function</b> getBackground() {
+</span></code><code id="L181"><span class="ln">181</span><span class="c">        <b>return</b> <i>'url('</i><span class="s"> + </span>params.images<span class="s"> + </span><i>')'</i>;
+</span></code><code id="L182"><span class="ln">182</span><span class="c">    } <span class="c">// getBackground</span>
+</span></code><code id="L183"><span class="ln">183</span><span class="c">    
+</span></code><code id="L184"><span class="ln">184</span><span class="c">    <b>function</b> getButtonBackground(buttonIndex, state) {
+</span></code><code id="L185"><span class="ln">185</span><span class="c">        <b>var</b> spriteOffset<span class="s"> = </span>spriteStart<span class="s"> + </span>thumbHeight<span class="s"> * </span><span class="d">3</span> +
+</span></code><code id="L186"><span class="ln">186</span><span class="c">                (buttonIndex<span class="s"> || </span><span class="d">0</span>)<span class="s"> * </span>buttonHeight<span class="s"> * </span><span class="d">3</span><span class="s"> + </span>
+</span></code><code id="L187"><span class="ln">187</span><span class="c">                (state<span class="s"> || </span><span class="d">0</span>)<span class="s"> * </span>buttonHeight;
+</span></code><code id="L188"><span class="ln">188</span><span class="c">        
+</span></code><code id="L189"><span class="ln">189</span><span class="c">        <b>return</b> <i>'url('</i><span class="s"> + </span>params.images<span class="s"> + </span><i>') <span class="d">0</span> -'</i><span class="s"> + </span>spriteOffset<span class="s"> + </span><i>'px'</i>; 
+</span></code><code id="L190"><span class="ln">190</span><span class="c">    }
+</span></code><code id="L191"><span class="ln">191</span><span class="c">    
+</span></code><code id="L192"><span class="ln">192</span><span class="c">    <b>function</b> getMargin() {
+</span></code><code id="L193"><span class="ln">193</span><span class="c">        <b>var</b> marginLeft<span class="s"> = </span>params.spacing,
+</span></code><code id="L194"><span class="ln">194</span><span class="c">            formatter<span class="s"> = </span>_formatter(<i>'{<span class="d">0</span>}px <span class="d">0</span> <span class="d">0</span> {<span class="d">1</span>}px'</i>);
+</span></code><code id="L195"><span class="ln">195</span><span class="c">
+</span></code><code id="L196"><span class="ln">196</span><span class="c">        <b>if</b> (params.align<span class="s"> === </span><i>'right'</i>) {
+</span></code><code id="L197"><span class="ln">197</span><span class="c">            marginLeft<span class="s"> = </span>container.offsetWidth<span class="s"> - </span>params.width<span class="s"> - </span>params.spacing;
+</span></code><code id="L198"><span class="ln">198</span><span class="c">        } <span class="c">// <b>if</b></span>
+</span></code><code id="L199"><span class="ln">199</span><span class="c">        
+</span></code><code id="L200"><span class="ln">200</span><span class="c">        <b>return</b> formatter(params.marginTop, marginLeft);
+</span></code><code id="L201"><span class="ln">201</span><span class="c">    } <span class="c">// getMargin</span>
+</span></code><code id="L202"><span class="ln">202</span><span class="c">    
+</span></code><code id="L203"><span class="ln">203</span><span class="c">    <b>function</b> getThumbBackground(state) {
+</span></code><code id="L204"><span class="ln">204</span><span class="c">        <b>var</b> spriteOffset<span class="s"> = </span>spriteStart<span class="s"> + </span>(state<span class="s"> || </span><span class="d">0</span>)<span class="s"> * </span>thumbHeight;
+</span></code><code id="L205"><span class="ln">205</span><span class="c">        
+</span></code><code id="L206"><span class="ln">206</span><span class="c">        <b>return</b> <i>'url('</i><span class="s"> + </span>params.images<span class="s"> + </span><i>') <span class="d">0</span> -'</i><span class="s"> + </span>spriteOffset<span class="s"> + </span><i>'px'</i>; 
+</span></code><code id="L207"><span class="ln">207</span><span class="c">    } <span class="c">// getThumbBackground</span>
+</span></code><code id="L208"><span class="ln">208</span><span class="c">    
+</span></code><code id="L209"><span class="ln">209</span><span class="c">    <b>function</b> handleDetach() {
+</span></code><code id="L210"><span class="ln">210</span><span class="c">        <span class="c">// unbind event handlers</span>
+</span></code><code id="L211"><span class="ln">211</span><span class="c">        eve.unbind(<i>'interact.pointer.down.'</i><span class="s"> + </span>zoomBar.id, handlePointerDown);
+</span></code><code id="L212"><span class="ln">212</span><span class="c">        eve.unbind(<i>'interact.pointer.move.'</i><span class="s"> + </span>zoomBar.id, handlePointerMove);
+</span></code><code id="L213"><span class="ln">213</span><span class="c">        eve.unbind(<i>'interact.pointer.up.'</i><span class="s"> + </span>zoomBar.id, handlePointerUp);
+</span></code><code id="L214"><span class="ln">214</span><span class="c">        eve.unbind(<i>'interact.tap.'</i><span class="s"> + </span>zoomBar.id, handlePointerTap);
+</span></code><code id="L215"><span class="ln">215</span><span class="c">        
+</span></code><code id="L216"><span class="ln">216</span><span class="c">        <span class="c">// remove the image div from the panFrame</span>
+</span></code><code id="L217"><span class="ln">217</span><span class="c">        container.removeChild(zoomBar);
+</span></code><code id="L218"><span class="ln">218</span><span class="c">    } <span class="c">// handleDetach</span>
+</span></code><code id="L219"><span class="ln">219</span><span class="c">    
+</span></code><code id="L220"><span class="ln">220</span><span class="c">    <b>function</b> handlePointerDown(evt, absXY, relXY) {
+</span></code><code id="L221"><span class="ln">221</span><span class="c">        <b>if</b> (<b>this</b> !== zoomBar) { <b>return</b>; }
+</span></code><code id="L222"><span class="ln">222</span><span class="c">
+</span></code><code id="L223"><span class="ln">223</span><span class="c">        updateSpriteState(evt.target, STATE_DOWN);
+</span></code><code id="L224"><span class="ln">224</span><span class="c">    } <span class="c">// handlePointerDown</span>
+</span></code><code id="L225"><span class="ln">225</span><span class="c">    
+</span></code><code id="L226"><span class="ln">226</span><span class="c">    <b>function</b> handlePointerMove(evt, absXY, relXY) {
+</span></code><code id="L227"><span class="ln">227</span><span class="c">        <span class="c">// update the thumb pos</span>
+</span></code><code id="L228"><span class="ln">228</span><span class="c">        thumbPos<span class="s"> = </span>Math.min(Math.max(thumbMin, relXY.y<span class="s"> - </span>(thumbHeight >> <span class="d">1</span>)), thumbMax);
+</span></code><code id="L229"><span class="ln">229</span><span class="c">        
+</span></code><code id="L230"><span class="ln">230</span><span class="c">        setThumbVal(zoomSteps<span class="s"> - </span>((thumbPos<span class="s"> - </span>thumbMin)<span class="s"> / </span>thumbMax)<span class="s"> * </span>zoomSteps<span class="s"> | </span><span class="d">0</span>);
+</span></code><code id="L231"><span class="ln">231</span><span class="c">    } <span class="c">// handlePointerMove</span>
+</span></code><code id="L232"><span class="ln">232</span><span class="c">    
+</span></code><code id="L233"><span class="ln">233</span><span class="c">    <b>function</b> handlePointerTap(evt, absXY, relXY) {
+</span></code><code id="L234"><span class="ln">234</span><span class="c">        <b>var</b> handler<span class="s"> = </span>tapHandlers[updateSpriteState(evt.target, STATE_DOWN)];
+</span></code><code id="L235"><span class="ln">235</span><span class="c">        <b>if</b> (handler) {
+</span></code><code id="L236"><span class="ln">236</span><span class="c">            handler();
+</span></code><code id="L237"><span class="ln">237</span><span class="c">        } <span class="c">// <b>if</b></span>
+</span></code><code id="L238"><span class="ln">238</span><span class="c">    }
+</span></code><code id="L239"><span class="ln">239</span><span class="c">    
+</span></code><code id="L240"><span class="ln">240</span><span class="c">    <b>function</b> handlePointerUp(evt, absXY, relXY) {
+</span></code><code id="L241"><span class="ln">241</span><span class="c">        updateSpriteState(evt.target, STATE_STATIC);
+</span></code><code id="L242"><span class="ln">242</span><span class="c">    } <span class="c">// handlePointerUp</span>
+</span></code><code id="L243"><span class="ln">243</span><span class="c">    
+</span></code><code id="L244"><span class="ln">244</span><span class="c">    <b>function</b> handleZoomLevelChange(evt, zoomLevel) {
+</span></code><code id="L245"><span class="ln">245</span><span class="c">        setThumbVal(zoomLevel);
+</span></code><code id="L246"><span class="ln">246</span><span class="c">    } <span class="c">// handleZoomLevelChange</span>
+</span></code><code id="L247"><span class="ln">247</span><span class="c">    
+</span></code><code id="L248"><span class="ln">248</span><span class="c">    <b>function</b> updateSpriteState(target, state) {
+</span></code><code id="L249"><span class="ln">249</span><span class="c">        <b>var</b> targetCode;
+</span></code><code id="L250"><span class="ln">250</span><span class="c">        
+</span></code><code id="L251"><span class="ln">251</span><span class="c">        <b>if</b> (target<span class="s"> === </span>thumb) {
+</span></code><code id="L252"><span class="ln">252</span><span class="c">            thumb.style.background<span class="s"> = </span>getThumbBackground(state);
+</span></code><code id="L253"><span class="ln">253</span><span class="c">            targetCode<span class="s"> = </span><i>'thumb'</i>;
+</span></code><code id="L254"><span class="ln">254</span><span class="c">        }
+</span></code><code id="L255"><span class="ln">255</span><span class="c">        <b>else</b> {
+</span></code><code id="L256"><span class="ln">256</span><span class="c">            <b>for</b> (<b>var</b> ii<span class="s"> = </span><span class="d">0</span>; ii &lt; buttons.length; ii++) {
+</span></code><code id="L257"><span class="ln">257</span><span class="c">                <b>if</b> (target<span class="s"> === </span>buttons[ii]) {
+</span></code><code id="L258"><span class="ln">258</span><span class="c">                    targetCode<span class="s"> = </span><i>'button'</i><span class="s"> + </span>ii;
+</span></code><code id="L259"><span class="ln">259</span><span class="c">                    buttons[ii].style.background<span class="s"> = </span>getButtonBackground(ii, state);
+</span></code><code id="L260"><span class="ln">260</span><span class="c">                    <b>break</b>;
+</span></code><code id="L261"><span class="ln">261</span><span class="c">                } <span class="c">// <b>if</b></span>
+</span></code><code id="L262"><span class="ln">262</span><span class="c">            } <span class="c">// <b>for</b></span>
+</span></code><code id="L263"><span class="ln">263</span><span class="c">        } <span class="c">// <b>if</b>..<b>else</b></span>
+</span></code><code id="L264"><span class="ln">264</span><span class="c">        
+</span></code><code id="L265"><span class="ln">265</span><span class="c">        <b>return</b> targetCode;
+</span></code><code id="L266"><span class="ln">266</span><span class="c">    } <span class="c">// updateSpriteState</span>
+</span></code><code id="L267"><span class="ln">267</span><span class="c">    
+</span></code><code id="L268"><span class="ln">268</span><span class="c">    <b>function</b> setThumbVal(value) {
+</span></code><code id="L269"><span class="ln">269</span><span class="c">        <b>if</b> (value !== thumbVal) {
+</span></code><code id="L270"><span class="ln">270</span><span class="c">            <span class="c">// calculate the thumb value</span>
+</span></code><code id="L271"><span class="ln">271</span><span class="c">            thumbVal<span class="s"> = </span>value;
+</span></code><code id="L272"><span class="ln">272</span><span class="c">
+</span></code><code id="L273"><span class="ln">273</span><span class="c">            <span class="c">// <b>if</b> we are snapping then calculate the snapped thumbpos</span>
+</span></code><code id="L274"><span class="ln">274</span><span class="c">            thumbPos<span class="s"> = </span>thumbMax<span class="s"> - </span>(thumbVal<span class="s"> / </span>zoomSteps<span class="s"> * </span>(thumbMax<span class="s"> - </span>thumbMin))<span class="s"> | </span><span class="d">0</span>;
+</span></code><code id="L275"><span class="ln">275</span><span class="c">            DOM.move(thumb, <span class="d">0</span>, thumbPos<span class="s"> - </span>thumbMin);
+</span></code><code id="L276"><span class="ln">276</span><span class="c">            
+</span></code><code id="L277"><span class="ln">277</span><span class="c">            clearTimeout(zoomTimeout);
+</span></code><code id="L278"><span class="ln">278</span><span class="c">            zoomTimeout<span class="s"> = </span>setTimeout(<b>function</b>() {
+</span></code><code id="L279"><span class="ln">279</span><span class="c">                <span class="c">// set the zoom level <b>for</b> the map</span>
+</span></code><code id="L280"><span class="ln">280</span><span class="c">                view.zoom(thumbVal);
+</span></code><code id="L281"><span class="ln">281</span><span class="c">            }, <span class="d">500</span>);
+</span></code><code id="L282"><span class="ln">282</span><span class="c">        } <span class="c">// <b>if</b></span>
+</span></code><code id="L283"><span class="ln">283</span><span class="c">    } <span class="c">// <b>if</b></span>
+</span></code><code id="L284"><span class="ln">284</span><span class="c">
+</span></code><code id="L285"><span class="ln">285</span><span class="c">    <span class="c">// attach the background image display</span>
+</span></code><code id="L286"><span class="ln">286</span><span class="c">    createZoomBar();
+</span></code><code id="L287"><span class="ln">287</span><span class="c">    
+</span></code><code id="L288"><span class="ln">288</span><span class="c">    <b>var</b> _this<span class="s"> = </span><b>new</b> Control(view);
+</span></code><code id="L289"><span class="ln">289</span><span class="c">    
+</span></code><code id="L290"><span class="ln">290</span><span class="c">    <span class="c">// handle the predraw</span>
+</span></code><code id="L291"><span class="ln">291</span><span class="c">    _this.bind(<i>'detach'</i>, handleDetach);
+</span></code><code id="L292"><span class="ln">292</span><span class="c">    
+</span></code><code id="L293"><span class="ln">293</span><span class="c">    <span class="c">// bind to the view zoom level change event</span>
+</span></code><code id="L294"><span class="ln">294</span><span class="c">    view.bind(<i>'zoom'</i>, handleZoomLevelChange);
+</span></code><code id="L295"><span class="ln">295</span><span class="c">    
+</span></code><code id="L296"><span class="ln">296</span><span class="c">    <span class="c">// set the zoom level to the current zoom level of the view</span>
+</span></code><code id="L297"><span class="ln">297</span><span class="c">    setThumbVal(view.zoom());
+</span></code><code id="L298"><span class="ln">298</span><span class="c">    
+</span></code><code id="L299"><span class="ln">299</span><span class="c">    <b>return</b> _this;
+</span></code><code id="L300"><span class="ln">300</span><span class="c">});
+</span></code><code id="L301"><span class="ln">301</span><span class="c">
+</span></code><code id="L302"><span class="ln">302</span><span class="c">*/</span>
+</code></body></html>
