@@ -8,7 +8,7 @@
 </span></code><code id="L6"><span class="ln">6</span><span class="c"> **
 </span></code><code id="L7"><span class="ln">7</span><span class="c"> > Options
 </span></code><code id="L8"><span class="ln">8</span><span class="c"> **
-</span></code><code id="L9"><span class="ln">9</span><span class="c"><span class="s"> * </span>
+</span></code><code id="L9"><span class="ln">9</span><span class="c"><span class="s"> * </span>autoRemove (<b>boolean</b>) whether or not the zoomrect should be autoremoved after a zoom operation
 </span></code><code id="L10"><span class="ln">10</span><span class="c"> **
 </span></code><code id="L11"><span class="ln">11</span><span class="c"><span class="s"> = </span>(DOMElement) the dom element that contains the zoomrect
 </span></code><code id="L12"><span class="ln">12</span><span class="c">\*/</span>
@@ -33,31 +33,38 @@
 </code><code id="L31"><span class="ln">31</span>    });
 </code><code id="L32"><span class="ln">32</span>    
 </code><code id="L33"><span class="ln">33</span>    eve.on(<i>'interact.pointer.down.'</i><span class="s"> + </span>id, <b>function</b>(evt, absXY, relXY) {
-</code><code id="L34"><span class="ln">34</span>        <span class="c">// create our zoombox</span>
-</code><code id="L35"><span class="ln">35</span>        box<span class="s"> = </span>MapControls._createEl(<i>'div'</i>, { className: opts.className<span class="s"> + </span><i>'-box'</i> }, {
-</code><code id="L36"><span class="ln">36</span>            position: <i>'absolute'</i>,
-</code><code id="L37"><span class="ln">37</span>            margin: relXY.y<span class="s"> + </span><i>'px <span class="d">0</span> <span class="d">0</span> '</i><span class="s"> + </span>relXY.x<span class="s"> + </span><i>'px'</i>
-</code><code id="L38"><span class="ln">38</span>        });
-</code><code id="L39"><span class="ln">39</span>        
-</code><code id="L40"><span class="ln">40</span>        <span class="c">// save the start xy</span>
-</code><code id="L41"><span class="ln">41</span>        startXY<span class="s"> = </span>{
-</code><code id="L42"><span class="ln">42</span>            x: relXY.x,
-</code><code id="L43"><span class="ln">43</span>            y: relXY.y
-</code><code id="L44"><span class="ln">44</span>        };
-</code><code id="L45"><span class="ln">45</span>        
-</code><code id="L46"><span class="ln">46</span>        zoomrect.appendChild(box);
-</code><code id="L47"><span class="ln">47</span>    });
-</code><code id="L48"><span class="ln">48</span>
-</code><code id="L49"><span class="ln">49</span>    eve.on(<i>'interact.pointer.move.'</i><span class="s"> + </span>id, <b>function</b>(evt, absXY, relXY) {
-</code><code id="L50"><span class="ln">50</span>        box.style.width<span class="s"> = </span>Math.max(<span class="d">0</span>, relXY.x<span class="s"> - </span>startXY.x)<span class="s"> + </span><i>'px'</i>;
-</code><code id="L51"><span class="ln">51</span>        box.style.height<span class="s"> = </span>Math.max(<span class="d">0</span>, relXY.y<span class="s"> - </span>startXY.y)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L34"><span class="ln">34</span>        <span class="c">// <b>if</b> the box was not successfully removed before, <b>do</b> that now</span>
+</code><code id="L35"><span class="ln">35</span>        <b>if</b> (box) {
+</code><code id="L36"><span class="ln">36</span>            zoomrect.removeChild(box);
+</code><code id="L37"><span class="ln">37</span>        }
+</code><code id="L38"><span class="ln">38</span>        
+</code><code id="L39"><span class="ln">39</span>        <span class="c">// create our zoombox</span>
+</code><code id="L40"><span class="ln">40</span>        box<span class="s"> = </span>MapControls._createEl(<i>'div'</i>, { className: opts.className<span class="s"> + </span><i>'-box'</i> }, {
+</code><code id="L41"><span class="ln">41</span>            position: <i>'absolute'</i>,
+</code><code id="L42"><span class="ln">42</span>            margin: relXY.y<span class="s"> + </span><i>'px <span class="d">0</span> <span class="d">0</span> '</i><span class="s"> + </span>relXY.x<span class="s"> + </span><i>'px'</i>
+</code><code id="L43"><span class="ln">43</span>        });
+</code><code id="L44"><span class="ln">44</span>        
+</code><code id="L45"><span class="ln">45</span>        <span class="c">// save the start xy</span>
+</code><code id="L46"><span class="ln">46</span>        startXY<span class="s"> = </span>{
+</code><code id="L47"><span class="ln">47</span>            x: relXY.x,
+</code><code id="L48"><span class="ln">48</span>            y: relXY.y
+</code><code id="L49"><span class="ln">49</span>        };
+</code><code id="L50"><span class="ln">50</span>        
+</code><code id="L51"><span class="ln">51</span>        zoomrect.appendChild(box);
 </code><code id="L52"><span class="ln">52</span>    });
-</code><code id="L53"><span class="ln">53</span>    
-</code><code id="L54"><span class="ln">54</span>    eve.on(<i>'interact.pointer.up.'</i><span class="s"> + </span>id, <b>function</b>(evt, absXY, relXY) {
-</code><code id="L55"><span class="ln">55</span>        zoomrect.removeChild(box);
-</code><code id="L56"><span class="ln">56</span>        box<span class="s"> = </span><b>null</b>;
+</code><code id="L53"><span class="ln">53</span>
+</code><code id="L54"><span class="ln">54</span>    eve.on(<i>'interact.pointer.move.'</i><span class="s"> + </span>id, <b>function</b>(evt, absXY, relXY) {
+</code><code id="L55"><span class="ln">55</span>        box.style.width<span class="s"> = </span>Math.max(<span class="d">0</span>, relXY.x<span class="s"> - </span>startXY.x)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L56"><span class="ln">56</span>        box.style.height<span class="s"> = </span>Math.max(<span class="d">0</span>, relXY.y<span class="s"> - </span>startXY.y)<span class="s"> + </span><i>'px'</i>;
 </code><code id="L57"><span class="ln">57</span>    });
 </code><code id="L58"><span class="ln">58</span>    
-</code><code id="L59"><span class="ln">59</span>    <b>return</b> zoomrect;
-</code><code id="L60"><span class="ln">60</span>});
+</code><code id="L59"><span class="ln">59</span>    eve.on(<i>'interact.pointer.up.'</i><span class="s"> + </span>id, <b>function</b>(evt, absXY, relXY) {
+</code><code id="L60"><span class="ln">60</span>        zoomrect.removeChild(box);
+</code><code id="L61"><span class="ln">61</span>        box<span class="s"> = </span><b>null</b>;
+</code><code id="L62"><span class="ln">62</span>    });
+</code><code id="L63"><span class="ln">63</span>    
+</code><code id="L64"><span class="ln">64</span>    <b>return</b> {
+</code><code id="L65"><span class="ln">65</span>        element: zoomrect
+</code><code id="L66"><span class="ln">66</span>    };
+</code><code id="L67"><span class="ln">67</span>});
 </code></body></html>

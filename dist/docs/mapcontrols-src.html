@@ -1076,212 +1076,329 @@
 </code><code id="L1074"><span class="ln">1074</span>
 </code><code id="L1075"><span class="ln">1075</span>}
 </code><code id="L1076"><span class="ln">1076</span>
-</code><code id="L1077"><span class="ln">1077</span><b>var</b> MapControls<span class="s"> = </span>(<b>function</b>() {
-</code><code id="L1078"><span class="ln">1078</span>    
-</code><code id="L1079"><span class="ln">1079</span>    <b>var</b> _dom<span class="s"> = </span>(<b>function</b>() {
-</code><code id="L1080"><span class="ln">1080</span>        
-</code><code id="L1081"><span class="ln">1081</span>        <b>var</b> _reWhitespace<span class="s"> = </span>/[\s\,]\s*/,
-</code><code id="L1082"><span class="ln">1082</span>            _reAlignOffset<span class="s"> = </span>/^(.*?)([\-\+]?\d*)$/,
-</code><code id="L1083"><span class="ln">1083</span>            _aligners<span class="s"> = </span>{
-</code><code id="L1084"><span class="ln">1084</span>                left: <b>function</b>(b, pb, offset) {
-</code><code id="L1085"><span class="ln">1085</span>                    <b>this</b>.style[<i>'margin-left'</i>]<span class="s"> = </span>(offset<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1086"><span class="ln">1086</span>                },
-</code><code id="L1087"><span class="ln">1087</span>                
-</code><code id="L1088"><span class="ln">1088</span>                center: <b>function</b>(b, pb, offset) {
-</code><code id="L1089"><span class="ln">1089</span>                    <b>this</b>.style[<i>'margin-left'</i>]<span class="s"> = </span>(((pb.width<span class="s"> - </span>b.width) >> <span class="d">1</span>)<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1090"><span class="ln">1090</span>                },
-</code><code id="L1091"><span class="ln">1091</span>                
-</code><code id="L1092"><span class="ln">1092</span>                right: <b>function</b>(b, pb, offset) {
-</code><code id="L1093"><span class="ln">1093</span>                    <b>this</b>.style[<i>'margin-left'</i>]<span class="s"> = </span>(pb.width<span class="s"> - </span>b.width<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1094"><span class="ln">1094</span>                },
-</code><code id="L1095"><span class="ln">1095</span>                
-</code><code id="L1096"><span class="ln">1096</span>                top: <b>function</b>(b, pb, offset) {
-</code><code id="L1097"><span class="ln">1097</span>                    <b>this</b>.style[<i>'margin-top'</i>]<span class="s"> = </span>(offset<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1077"><span class="ln">1077</span><b>if</b> (<b>typeof</b> classtweak<span class="s"> == </span><i>'<b>undefined</b>'</i>) {
+</code><code id="L1078"><span class="ln">1078</span>    <b>function</b> classtweak(elements, initAction, scope) {
+</code><code id="L1079"><span class="ln">1079</span>        <span class="c">// <b>if</b> elements is not defined, then <b>return</b></span>
+</code><code id="L1080"><span class="ln">1080</span>        <b>if</b> (! elements) {
+</code><code id="L1081"><span class="ln">1081</span>            <b>return</b> <b>undefined</b>;
+</code><code id="L1082"><span class="ln">1082</span>        } <span class="c">// <b>if</b></span>
+</code><code id="L1083"><span class="ln">1083</span>    
+</code><code id="L1084"><span class="ln">1084</span>        <span class="c">// internals</span>
+</code><code id="L1085"><span class="ln">1085</span>        <b>var</b> reSpaces<span class="s"> = </span>/[\s\,]+/,
+</code><code id="L1086"><span class="ln">1086</span>            instructionHandlers<span class="s"> = </span>{
+</code><code id="L1087"><span class="ln">1087</span>                <i>'+'</i>: <b>function</b>(current, target, foundIdx) {
+</code><code id="L1088"><span class="ln">1088</span>                    <span class="c">// <b>if</b> the style was not found, then add it</span>
+</code><code id="L1089"><span class="ln">1089</span>                    <b>if</b> (foundIdx &lt; <span class="d">0</span>) {
+</code><code id="L1090"><span class="ln">1090</span>                        current[current.length]<span class="s"> = </span>target;
+</code><code id="L1091"><span class="ln">1091</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L1092"><span class="ln">1092</span>                },
+</code><code id="L1093"><span class="ln">1093</span>                
+</code><code id="L1094"><span class="ln">1094</span>                <i>'-'</i>: <b>function</b>(current, target, foundIdx) {
+</code><code id="L1095"><span class="ln">1095</span>                    <b>if</b> (foundIdx >= <span class="d">0</span>) {
+</code><code id="L1096"><span class="ln">1096</span>                        current.splice(foundIdx, <span class="d">1</span>);
+</code><code id="L1097"><span class="ln">1097</span>                    } <span class="c">// <b>if</b></span>
 </code><code id="L1098"><span class="ln">1098</span>                },
 </code><code id="L1099"><span class="ln">1099</span>                
-</code><code id="L1100"><span class="ln">1100</span>                middle: <b>function</b>(b, pb, offset) {
-</code><code id="L1101"><span class="ln">1101</span>                    <b>this</b>.style[<i>'margin-top'</i>]<span class="s"> = </span>(((pb.height<span class="s"> - </span>b.height) >> <span class="d">1</span>)<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1102"><span class="ln">1102</span>                },
-</code><code id="L1103"><span class="ln">1103</span>                
-</code><code id="L1104"><span class="ln">1104</span>                bottom: <b>function</b>(b, pb, offset) {
-</code><code id="L1105"><span class="ln">1105</span>                    <b>this</b>.style[<i>'margin-top'</i>]<span class="s"> = </span>(pb.height<span class="s"> - </span>b.height<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1106"><span class="ln">1106</span>                }
-</code><code id="L1107"><span class="ln">1107</span>            };
-</code><code id="L1108"><span class="ln">1108</span>        
-</code><code id="L1109"><span class="ln">1109</span>        <b>function</b> create(tag, attributes, css) {
-</code><code id="L1110"><span class="ln">1110</span>            <b>var</b> element<span class="s"> = </span>document.createElement(tag), key;
-</code><code id="L1111"><span class="ln">1111</span>            
-</code><code id="L1112"><span class="ln">1112</span>            <span class="c">// iterate through the attributes</span>
-</code><code id="L1113"><span class="ln">1113</span>            <b>for</b> (key <b>in</b> attributes) {
-</code><code id="L1114"><span class="ln">1114</span>                <b>if</b> (attributes.hasOwnProperty(key)) {
-</code><code id="L1115"><span class="ln">1115</span>                    element[key]<span class="s"> = </span>attributes[key];
-</code><code id="L1116"><span class="ln">1116</span>                } 
-</code><code id="L1117"><span class="ln">1117</span>            } 
-</code><code id="L1118"><span class="ln">1118</span>            
-</code><code id="L1119"><span class="ln">1119</span>            <b>for</b> (key <b>in</b> css) {
-</code><code id="L1120"><span class="ln">1120</span>                <b>if</b> (css.hasOwnProperty(key)) {
-</code><code id="L1121"><span class="ln">1121</span>                    element.style[key]<span class="s"> = </span>css[key];
-</code><code id="L1122"><span class="ln">1122</span>                }
-</code><code id="L1123"><span class="ln">1123</span>            }
-</code><code id="L1124"><span class="ln">1124</span>            
-</code><code id="L1125"><span class="ln">1125</span>            <b>return</b> element;
-</code><code id="L1126"><span class="ln">1126</span>        } <span class="c">// createEl</span>
-</code><code id="L1127"><span class="ln">1127</span>        
-</code><code id="L1128"><span class="ln">1128</span>        <b>function</b> position(element, alignment) {
-</code><code id="L1129"><span class="ln">1129</span>            <span class="c">// <b>if</b> we have an element and a containing node, then process</span>
-</code><code id="L1130"><span class="ln">1130</span>            <b>if</b> (element<span class="s"> &amp;&amp; </span>element.parentNode) {
-</code><code id="L1131"><span class="ln">1131</span>                <b>var</b> aligns<span class="s"> = </span>(alignment<span class="s"> || </span><i>''</i>).split(_reWhitespace),
-</code><code id="L1132"><span class="ln">1132</span>                    alignA<span class="s"> = </span>_reAlignOffset.exec(aligns[<span class="d">0</span>])<span class="s"> || </span>[, <i>'left'</i>, <span class="d">0</span>],
-</code><code id="L1133"><span class="ln">1133</span>                    alignB<span class="s"> = </span>_reAlignOffset.exec(aligns[<span class="d">1</span>])<span class="s"> || </span>[, <i>'top'</i>, <span class="d">0</span>],
-</code><code id="L1134"><span class="ln">1134</span>                    alignerA<span class="s"> = </span>_aligners[alignA[<span class="d">1</span>]]<span class="s"> || </span>_aligners.left,
-</code><code id="L1135"><span class="ln">1135</span>                    alignerB<span class="s"> = </span>_aligners[alignB[<span class="d">1</span>]]<span class="s"> || </span>_aligners.top,
-</code><code id="L1136"><span class="ln">1136</span>                    bounds<span class="s"> = </span>element.getBoundingClientRect(),
-</code><code id="L1137"><span class="ln">1137</span>                    parentBounds<span class="s"> = </span>element.parentNode.getBoundingClientRect();
-</code><code id="L1138"><span class="ln">1138</span>                
-</code><code id="L1139"><span class="ln">1139</span>                <span class="c">// set the position to absolute</span>
-</code><code id="L1140"><span class="ln">1140</span>                element.style.position<span class="s"> = </span><i>'absolute'</i>;
-</code><code id="L1141"><span class="ln">1141</span>    
-</code><code id="L1142"><span class="ln">1142</span>                <span class="c">// position the element</span>
-</code><code id="L1143"><span class="ln">1143</span>                alignerA.call(element, bounds, parentBounds, parseInt(alignA[<span class="d">2</span>], <span class="d">10</span>));
-</code><code id="L1144"><span class="ln">1144</span>                alignerB.call(element, bounds, parentBounds, parseInt(alignB[<span class="d">2</span>], <span class="d">10</span>));
-</code><code id="L1145"><span class="ln">1145</span>            }
-</code><code id="L1146"><span class="ln">1146</span>        } <span class="c">// position</span>
-</code><code id="L1147"><span class="ln">1147</span>        
-</code><code id="L1148"><span class="ln">1148</span>        <b>return</b> {
-</code><code id="L1149"><span class="ln">1149</span>            create: create,
-</code><code id="L1150"><span class="ln">1150</span>            position: position
-</code><code id="L1151"><span class="ln">1151</span>        };
-</code><code id="L1152"><span class="ln">1152</span>    })();
-</code><code id="L1153"><span class="ln">1153</span>
-</code><code id="L1154"><span class="ln">1154</span>    
-</code><code id="L1155"><span class="ln">1155</span><span class="c">    <span class="c"><span class="c">/* internals</span> */</span></span>
-</code><code id="L1156"><span class="ln">1156</span>    
-</code><code id="L1157"><span class="ln">1157</span>    <b>var</b> _classMC<span class="s"> = </span><i>'mc-controls'</i>,
-</code><code id="L1158"><span class="ln">1158</span>        _registry<span class="s"> = </span>{};
-</code><code id="L1159"><span class="ln">1159</span>    
-</code><code id="L1160"><span class="ln">1160</span>    <b>function</b> getControlsLayer(target) {
-</code><code id="L1161"><span class="ln">1161</span>        <span class="c">// look <b>for</b> a controls layer within the target</span>
-</code><code id="L1162"><span class="ln">1162</span>        <b>var</b> results<span class="s"> = </span>target.getElementsByClassName(_classMC),
-</code><code id="L1163"><span class="ln">1163</span>            controlLayer<span class="s"> = </span>results[<span class="d">0</span>];
-</code><code id="L1164"><span class="ln">1164</span>
-</code><code id="L1165"><span class="ln">1165</span>        <span class="c">// <b>if</b> we don't have a control layer, then create one</span>
-</code><code id="L1166"><span class="ln">1166</span>        <b>if</b> (! controlLayer) {
-</code><code id="L1167"><span class="ln">1167</span>            <b>var</b> targetBounds<span class="s"> = </span>target.getBoundingClientRect();
+</code><code id="L1100"><span class="ln">1100</span>                <i>'!'</i>: <b>function</b>(current, target, foundIdx) {
+</code><code id="L1101"><span class="ln">1101</span>                    instructionHandlers[foundIdx &lt; <span class="d">0</span> ? <i>'+'</i> : <i>'-'</i>](current, target, foundIdx);
+</code><code id="L1102"><span class="ln">1102</span>                }
+</code><code id="L1103"><span class="ln">1103</span>            };
+</code><code id="L1104"><span class="ln">1104</span>        
+</code><code id="L1105"><span class="ln">1105</span>        <b>function</b> tweak(actions) {
+</code><code id="L1106"><span class="ln">1106</span>            <span class="c">// itereate through the elements</span>
+</code><code id="L1107"><span class="ln">1107</span>            <b>for</b> (<b>var</b> elIdx<span class="s"> = </span>elements.length; elIdx--; ) {
+</code><code id="L1108"><span class="ln">1108</span>                <b>var</b> element<span class="s"> = </span>elements[elIdx],
+</code><code id="L1109"><span class="ln">1109</span>                    activeClasses<span class="s"> = </span>element.className ? element.className.split(/\s+/).sort() : [],
+</code><code id="L1110"><span class="ln">1110</span>                    ii;
+</code><code id="L1111"><span class="ln">1111</span>    
+</code><code id="L1112"><span class="ln">1112</span>                <span class="c">// <b>if</b> the action is a string, then parse into an array</span>
+</code><code id="L1113"><span class="ln">1113</span>                <b>if</b> (<b>typeof</b> actions<span class="s"> == </span><i>'string'</i>) {
+</code><code id="L1114"><span class="ln">1114</span>                    actions<span class="s"> = </span>actions.split(reSpaces);
+</code><code id="L1115"><span class="ln">1115</span>                } <span class="c">// <b>if</b></span>
+</code><code id="L1116"><span class="ln">1116</span>    
+</code><code id="L1117"><span class="ln">1117</span>                <span class="c">// iterate through the actions and apply the tweaks</span>
+</code><code id="L1118"><span class="ln">1118</span>                <b>for</b> (ii<span class="s"> = </span>actions.length; ii--; ) {
+</code><code id="L1119"><span class="ln">1119</span>                    <span class="c">// get the action instruction</span>
+</code><code id="L1120"><span class="ln">1120</span>                    <b>var</b> action<span class="s"> = </span>actions[ii],
+</code><code id="L1121"><span class="ln">1121</span>                        instruction<span class="s"> = </span>action.slice(<span class="d">0</span>, <span class="d">1</span>),
+</code><code id="L1122"><span class="ln">1122</span>                        lastChar<span class="s"> = </span>action.slice(-<span class="d">1</span>),
+</code><code id="L1123"><span class="ln">1123</span>                        className<span class="s"> = </span>action.slice(<span class="d">1</span>),
+</code><code id="L1124"><span class="ln">1124</span>                        handler<span class="s"> = </span>instructionHandlers[instruction],
+</code><code id="L1125"><span class="ln">1125</span>                        dotSyntax<span class="s"> = </span>instruction<span class="s"> == </span><i>'.'</i><span class="s"> || </span>lastChar<span class="s"> == </span><i>'.'</i>,
+</code><code id="L1126"><span class="ln">1126</span>                        classIdx, found<span class="s"> = </span>-<span class="d">1</span>;
+</code><code id="L1127"><span class="ln">1127</span>                        
+</code><code id="L1128"><span class="ln">1128</span>                    <span class="c">// <b>if</b> the instruction handler is not found, then <b>default</b> to +</span>
+</code><code id="L1129"><span class="ln">1129</span>                    <span class="c">// also, use the full action text</span>
+</code><code id="L1130"><span class="ln">1130</span>                    <b>if</b> (! handler) {
+</code><code id="L1131"><span class="ln">1131</span>                        <span class="c">// <b>if</b> we have the dot syntax then <b>do</b> more parsing</span>
+</code><code id="L1132"><span class="ln">1132</span>                        <b>if</b> (dotSyntax) {
+</code><code id="L1133"><span class="ln">1133</span>                            <span class="c">// update the handler</span>
+</code><code id="L1134"><span class="ln">1134</span>                            handler<span class="s"> = </span>instructionHandlers[
+</code><code id="L1135"><span class="ln">1135</span>                                instruction<span class="s"> == </span><i>'.'</i><span class="s"> &amp;&amp; </span>lastChar<span class="s"> == </span><i>'.'</i> ? <i>'!'</i> : 
+</code><code id="L1136"><span class="ln">1136</span>                                    instruction<span class="s"> == </span><i>'.'</i> ? <i>'+'</i> : <i>'-'</i>
+</code><code id="L1137"><span class="ln">1137</span>                            ];
+</code><code id="L1138"><span class="ln">1138</span>                            
+</code><code id="L1139"><span class="ln">1139</span>                            <span class="c">// update the classname</span>
+</code><code id="L1140"><span class="ln">1140</span>                            className<span class="s"> = </span>action.slice(
+</code><code id="L1141"><span class="ln">1141</span>                                instruction<span class="s"> == </span><i>'.'</i> ? <span class="d">1</span> : <span class="d">0</span>, 
+</code><code id="L1142"><span class="ln">1142</span>                                lastChar<span class="s"> == </span><i>'.'</i> ? -<span class="d">1</span> : <b>undefined</b>
+</code><code id="L1143"><span class="ln">1143</span>                            );
+</code><code id="L1144"><span class="ln">1144</span>                        }
+</code><code id="L1145"><span class="ln">1145</span>                        <span class="c">// otherwise, just fall back to the add handler</span>
+</code><code id="L1146"><span class="ln">1146</span>                        <b>else</b> {
+</code><code id="L1147"><span class="ln">1147</span>                            <span class="c">// <b>if</b> the last character is a dot, push to the dot handler, otherwise +</span>
+</code><code id="L1148"><span class="ln">1148</span>                            handler<span class="s"> = </span>instructionHandlers[<i>'+'</i>];
+</code><code id="L1149"><span class="ln">1149</span>                            className<span class="s"> = </span>actions[ii];
+</code><code id="L1150"><span class="ln">1150</span>                        } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L1151"><span class="ln">1151</span>                    } <span class="c">// <b>if</b></span>
+</code><code id="L1152"><span class="ln">1152</span>                    
+</code><code id="L1153"><span class="ln">1153</span>                    <span class="c">// iterate through the active classes and update the found state</span>
+</code><code id="L1154"><span class="ln">1154</span>                    <b>for</b> (classIdx<span class="s"> = </span>activeClasses.length; (found &lt; <span class="d">0</span>)<span class="s"> &amp;&amp; </span>classIdx--; ) {
+</code><code id="L1155"><span class="ln">1155</span>                        <span class="c">// <b>if</b> we have a match on the <b>class</b>, then update the found index</span>
+</code><code id="L1156"><span class="ln">1156</span>                        <b>if</b> (activeClasses[classIdx]<span class="s"> === </span>className) {
+</code><code id="L1157"><span class="ln">1157</span>                            found<span class="s"> = </span>classIdx;
+</code><code id="L1158"><span class="ln">1158</span>                        } <span class="c">// <b>if</b></span>
+</code><code id="L1159"><span class="ln">1159</span>                    } <span class="c">// <b>for</b></span>
+</code><code id="L1160"><span class="ln">1160</span>    
+</code><code id="L1161"><span class="ln">1161</span>                    <span class="c">// apply the handler, activeClasses modified <b>in</b> place</span>
+</code><code id="L1162"><span class="ln">1162</span>                    handler(activeClasses, className, found);
+</code><code id="L1163"><span class="ln">1163</span>                } <span class="c">// <b>for</b></span>
+</code><code id="L1164"><span class="ln">1164</span>    
+</code><code id="L1165"><span class="ln">1165</span>                <span class="c">// update the element classname</span>
+</code><code id="L1166"><span class="ln">1166</span>                element.className<span class="s"> = </span>activeClasses.join(<i>' '</i>);
+</code><code id="L1167"><span class="ln">1167</span>            } <span class="c">// <b>for</b></span>
 </code><code id="L1168"><span class="ln">1168</span>            
-</code><code id="L1169"><span class="ln">1169</span>            controlLayer<span class="s"> = </span>_dom.create(<i>'div'</i>, { className: _classMC }, {
-</code><code id="L1170"><span class="ln">1170</span>                position: <i>'absolute'</i>,
-</code><code id="L1171"><span class="ln">1171</span>                width: targetBounds.width<span class="s"> + </span><i>'px'</i>,
-</code><code id="L1172"><span class="ln">1172</span>                height: targetBounds.height<span class="s"> + </span><i>'px'</i>,
-</code><code id="L1173"><span class="ln">1173</span>                <i>'z-index'</i>: <span class="d">1000</span>
-</code><code id="L1174"><span class="ln">1174</span>            });
-</code><code id="L1175"><span class="ln">1175</span>            
-</code><code id="L1176"><span class="ln">1176</span>            <span class="c">// add to the target</span>
-</code><code id="L1177"><span class="ln">1177</span>            target.appendChild(controlLayer);
-</code><code id="L1178"><span class="ln">1178</span>        } <span class="c">// <b>if</b></span>
-</code><code id="L1179"><span class="ln">1179</span>
-</code><code id="L1180"><span class="ln">1180</span>        <b>return</b> controlLayer;
-</code><code id="L1181"><span class="ln">1181</span>    } <span class="c">// getControlsLayer</span>
-</code><code id="L1182"><span class="ln">1182</span>    
-</code><code id="L1183"><span class="ln">1183</span>    <b>function</b> positionControl(target, control, opts) {
-</code><code id="L1184"><span class="ln">1184</span>        <span class="c">// <b>if</b> we have a control that wants to display full size, then match the container size</span>
-</code><code id="L1185"><span class="ln">1185</span>        <b>if</b> (opts.fullsize) {
-</code><code id="L1186"><span class="ln">1186</span>            <b>var</b> rect<span class="s"> = </span>target.getBoundingClientRect();
-</code><code id="L1187"><span class="ln">1187</span>            
-</code><code id="L1188"><span class="ln">1188</span>            control.style.width<span class="s"> = </span>rect.width<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1189"><span class="ln">1189</span>            control.style.height<span class="s"> = </span>rect.height<span class="s"> + </span><i>'px'</i>;
-</code><code id="L1190"><span class="ln">1190</span>            opts.alignment<span class="s"> = </span><i>'top left'</i>;
-</code><code id="L1191"><span class="ln">1191</span>        }
-</code><code id="L1192"><span class="ln">1192</span>        
-</code><code id="L1193"><span class="ln">1193</span>        control.style[<i>'z-index'</i>]<span class="s"> = </span><span class="d">1000</span>;
-</code><code id="L1194"><span class="ln">1194</span>        _dom.position(control, opts.alignment);
-</code><code id="L1195"><span class="ln">1195</span>    } <span class="c">// positionControl</span>
-</code><code id="L1196"><span class="ln">1196</span>    
-</code><code id="L1197"><span class="ln">1197</span><span class="c">    <span class="c"><span class="c">/* exports</span> */</span></span>
-</code><code id="L1198"><span class="ln">1198</span>    
-</code><code id="L1199"><span class="ln">1199</span><span class="c">    <span class="c">/*\</span>
-</span></code><code id="L1200"><span class="ln">1200</span><span class="c">    <span class="s"> * </span>MapControls.add
-</span></code><code id="L1201"><span class="ln">1201</span><span class="c">     [ <b>function</b> ]
-</span></code><code id="L1202"><span class="ln">1202</span><span class="c">     **
-</span></code><code id="L1203"><span class="ln">1203</span><span class="c">    <span class="s"> * </span>Add a <b>new</b> control of `controlType` to the specified `target` element.
-</span></code><code id="L1204"><span class="ln">1204</span><span class="c">     **
-</span></code><code id="L1205"><span class="ln">1205</span><span class="c">     > Arguments
-</span></code><code id="L1206"><span class="ln">1206</span><span class="c">     **
-</span></code><code id="L1207"><span class="ln">1207</span><span class="c">    <span class="s"> - </span>target (DOMElement) the element that the control will be added to
-</span></code><code id="L1208"><span class="ln">1208</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control we are creating
-</span></code><code id="L1209"><span class="ln">1209</span><span class="c">    <span class="s"> - </span>opts (object) options that will be passed onto the control
-</span></code><code id="L1210"><span class="ln">1210</span><span class="c">     **
-</span></code><code id="L1211"><span class="ln">1211</span><span class="c">    <span class="s"> = </span>(DOMElement) the dom element that contains the newly created control
-</span></code><code id="L1212"><span class="ln">1212</span><span class="c">     **
-</span></code><code id="L1213"><span class="ln">1213</span><span class="c">     > Options
-</span></code><code id="L1214"><span class="ln">1214</span><span class="c">     **
-</span></code><code id="L1215"><span class="ln">1215</span><span class="c">    <span class="s"> * </span>The following options are supported by most controls
-</span></code><code id="L1216"><span class="ln">1216</span><span class="c">     **
-</span></code><code id="L1217"><span class="ln">1217</span><span class="c">    <span class="s"> - </span>aggressiveCapture (<b>boolean</b>) whether or not Interact will prevent <b>default</b> events from firing after intercepting events
-</span></code><code id="L1218"><span class="ln">1218</span><span class="c">    \*/</span>
-</code><code id="L1219"><span class="ln">1219</span>    <b>function</b> add(target, controlType, opts) {
-</code><code id="L1220"><span class="ln">1220</span>        <span class="c">// ensure the options have been defined</span>
-</code><code id="L1221"><span class="ln">1221</span>        <span class="c">// (we pass these by reference)</span>
-</code><code id="L1222"><span class="ln">1222</span>        opts<span class="s"> = </span>opts<span class="s"> || </span>{};
-</code><code id="L1223"><span class="ln">1223</span>        
-</code><code id="L1224"><span class="ln">1224</span>        <span class="c">// get the control</span>
-</code><code id="L1225"><span class="ln">1225</span>        <b>var</b> control<span class="s"> = </span>get(controlType, opts);
-</code><code id="L1226"><span class="ln">1226</span>        <b>if</b> (control) {
-</code><code id="L1227"><span class="ln">1227</span>            <span class="c">// add the control to the target</span>
-</code><code id="L1228"><span class="ln">1228</span>            target.appendChild(control);
-</code><code id="L1229"><span class="ln">1229</span>            
-</code><code id="L1230"><span class="ln">1230</span>            <span class="c">// position the control</span>
-</code><code id="L1231"><span class="ln">1231</span>            positionControl(target, control, opts);
-</code><code id="L1232"><span class="ln">1232</span>        }
-</code><code id="L1233"><span class="ln">1233</span>        
-</code><code id="L1234"><span class="ln">1234</span>        <b>return</b> control;
-</code><code id="L1235"><span class="ln">1235</span>    } <span class="c">// add</span>
-</code><code id="L1236"><span class="ln">1236</span>    
-</code><code id="L1237"><span class="ln">1237</span><span class="c">    <span class="c">/*\</span>
-</span></code><code id="L1238"><span class="ln">1238</span><span class="c">    <span class="s"> * </span>MapControls.get
-</span></code><code id="L1239"><span class="ln">1239</span><span class="c">     [ <b>function</b> ]
-</span></code><code id="L1240"><span class="ln">1240</span><span class="c">     **
-</span></code><code id="L1241"><span class="ln">1241</span><span class="c">    <span class="s"> * </span>Create a <b>new</b> control of `controlType`
-</span></code><code id="L1242"><span class="ln">1242</span><span class="c">     **
-</span></code><code id="L1243"><span class="ln">1243</span><span class="c">     > Arguments
-</span></code><code id="L1244"><span class="ln">1244</span><span class="c">     **
-</span></code><code id="L1245"><span class="ln">1245</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control we are creating
-</span></code><code id="L1246"><span class="ln">1246</span><span class="c">    <span class="s"> - </span>opts (object) options that will be passed onto the control
-</span></code><code id="L1247"><span class="ln">1247</span><span class="c">     **
-</span></code><code id="L1248"><span class="ln">1248</span><span class="c">    <span class="s"> = </span>(DOMElement) the dom element that contains the newly created control
-</span></code><code id="L1249"><span class="ln">1249</span><span class="c">     **
-</span></code><code id="L1250"><span class="ln">1250</span><span class="c">     > Options
-</span></code><code id="L1251"><span class="ln">1251</span><span class="c">     **
-</span></code><code id="L1252"><span class="ln">1252</span><span class="c">    <span class="s"> * </span>As per @MapControls.add
-</span></code><code id="L1253"><span class="ln">1253</span><span class="c">    \*/</span>
-</code><code id="L1254"><span class="ln">1254</span>    <b>function</b> get(controlType, opts) {
-</code><code id="L1255"><span class="ln">1255</span>        <b>var</b> creator<span class="s"> = </span>_registry[controlType];
-</code><code id="L1256"><span class="ln">1256</span>        <b>if</b> (creator) {
-</code><code id="L1257"><span class="ln">1257</span>            <b>return</b> creator.call(creator, opts);
-</code><code id="L1258"><span class="ln">1258</span>        }
-</code><code id="L1259"><span class="ln">1259</span>    } <span class="c">// get</span>
-</code><code id="L1260"><span class="ln">1260</span>    
-</code><code id="L1261"><span class="ln">1261</span><span class="c">    <span class="c">/*\</span>
-</span></code><code id="L1262"><span class="ln">1262</span><span class="c">    <span class="s"> * </span>MapControls.register
-</span></code><code id="L1263"><span class="ln">1263</span><span class="c">     [ <b>function</b> ]
-</span></code><code id="L1264"><span class="ln">1264</span><span class="c">     **
-</span></code><code id="L1265"><span class="ln">1265</span><span class="c">    <span class="s"> * </span>Register a <b>new</b> map control creator
-</span></code><code id="L1266"><span class="ln">1266</span><span class="c">     **
-</span></code><code id="L1267"><span class="ln">1267</span><span class="c">     > Arguments
-</span></code><code id="L1268"><span class="ln">1268</span><span class="c">     **
-</span></code><code id="L1269"><span class="ln">1269</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control being registered
-</span></code><code id="L1270"><span class="ln">1270</span><span class="c">    <span class="s"> - </span>creator (<b>function</b>) the creator <b>function</b> called when a <b>new</b> control is requested
-</span></code><code id="L1271"><span class="ln">1271</span><span class="c">    \*/</span>
-</code><code id="L1272"><span class="ln">1272</span>    <b>function</b> register(controlType, creator) {
-</code><code id="L1273"><span class="ln">1273</span>        <span class="c">// register the control creator</span>
-</code><code id="L1274"><span class="ln">1274</span>        _registry[controlType]<span class="s"> = </span>creator;
-</code><code id="L1275"><span class="ln">1275</span>    } <span class="c">// register</span>
-</code><code id="L1276"><span class="ln">1276</span>    
-</code><code id="L1277"><span class="ln">1277</span>    <b>return</b> {
-</code><code id="L1278"><span class="ln">1278</span>        _createEl: _dom.create,
-</code><code id="L1279"><span class="ln">1279</span>        
-</code><code id="L1280"><span class="ln">1280</span>        add: add,
-</code><code id="L1281"><span class="ln">1281</span>        get: get,
-</code><code id="L1282"><span class="ln">1282</span>        register: register
-</code><code id="L1283"><span class="ln">1283</span>    };
-</code><code id="L1284"><span class="ln">1284</span>})();
+</code><code id="L1169"><span class="ln">1169</span>            <b>return</b> tweak;
+</code><code id="L1170"><span class="ln">1170</span>        } <span class="c">// tweak</span>
+</code><code id="L1171"><span class="ln">1171</span>        
+</code><code id="L1172"><span class="ln">1172</span>        <span class="c">// check the elements</span>
+</code><code id="L1173"><span class="ln">1173</span>        <b>if</b> (<b>typeof</b> elements<span class="s"> == </span><i>'string'</i><span class="s"> || </span>elements <b>instanceof</b> String) {
+</code><code id="L1174"><span class="ln">1174</span>            elements<span class="s"> = </span>(scope<span class="s"> || </span>document).querySelectorAll(elements);
+</code><code id="L1175"><span class="ln">1175</span>        }
+</code><code id="L1176"><span class="ln">1176</span>        <span class="c">// <b>if</b> we don<i>'t have a splice <b>function</b>, then we don'</i>t have an array</span>
+</code><code id="L1177"><span class="ln">1177</span>        <span class="c">// make it one</span>
+</code><code id="L1178"><span class="ln">1178</span>        <b>else</b> <b>if</b> (! elements.splice) {
+</code><code id="L1179"><span class="ln">1179</span>            elements<span class="s"> = </span>[elements];
+</code><code id="L1180"><span class="ln">1180</span>        } <span class="c">// <b>if</b>..<b>else</b></span>
+</code><code id="L1181"><span class="ln">1181</span>    
+</code><code id="L1182"><span class="ln">1182</span>        <span class="c">// apply the requested action</span>
+</code><code id="L1183"><span class="ln">1183</span>        <b>if</b> (initAction) {
+</code><code id="L1184"><span class="ln">1184</span>            tweak(initAction);
+</code><code id="L1185"><span class="ln">1185</span>        } <span class="c">// <b>if</b></span>
+</code><code id="L1186"><span class="ln">1186</span>        
+</code><code id="L1187"><span class="ln">1187</span>        <span class="c">// <b>return</b> the tweak</span>
+</code><code id="L1188"><span class="ln">1188</span>        <b>return</b> initAction ? classtweak : tweak;
+</code><code id="L1189"><span class="ln">1189</span>    } <span class="c">// classtweak</span>
+</code><code id="L1190"><span class="ln">1190</span>
+</code><code id="L1191"><span class="ln">1191</span>}
+</code><code id="L1192"><span class="ln">1192</span>
+</code><code id="L1193"><span class="ln">1193</span><b>var</b> MapControls<span class="s"> = </span>(<b>function</b>() {
+</code><code id="L1194"><span class="ln">1194</span>    
+</code><code id="L1195"><span class="ln">1195</span>    <b>var</b> _dom<span class="s"> = </span>(<b>function</b>() {
+</code><code id="L1196"><span class="ln">1196</span>        
+</code><code id="L1197"><span class="ln">1197</span>        <b>var</b> _reWhitespace<span class="s"> = </span>/[\s\,]\s*/,
+</code><code id="L1198"><span class="ln">1198</span>            _reAlignOffset<span class="s"> = </span>/^(.*?)([\-\+]?\d*)$/,
+</code><code id="L1199"><span class="ln">1199</span>            _aligners<span class="s"> = </span>{
+</code><code id="L1200"><span class="ln">1200</span>                left: <b>function</b>(b, pb, offset) {
+</code><code id="L1201"><span class="ln">1201</span>                    <b>this</b>.style.marginLeft<span class="s"> = </span>(offset<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1202"><span class="ln">1202</span>                },
+</code><code id="L1203"><span class="ln">1203</span>                
+</code><code id="L1204"><span class="ln">1204</span>                center: <b>function</b>(b, pb, offset) {
+</code><code id="L1205"><span class="ln">1205</span>                    <b>this</b>.style.marginLeft<span class="s"> = </span>(((pb.width<span class="s"> - </span>b.width) >> <span class="d">1</span>)<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1206"><span class="ln">1206</span>                },
+</code><code id="L1207"><span class="ln">1207</span>                
+</code><code id="L1208"><span class="ln">1208</span>                right: <b>function</b>(b, pb, offset) {
+</code><code id="L1209"><span class="ln">1209</span>                    <b>this</b>.style.marginLeft<span class="s"> = </span>(pb.width<span class="s"> - </span>b.width<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1210"><span class="ln">1210</span>                },
+</code><code id="L1211"><span class="ln">1211</span>                
+</code><code id="L1212"><span class="ln">1212</span>                top: <b>function</b>(b, pb, offset) {
+</code><code id="L1213"><span class="ln">1213</span>                    <b>this</b>.style.marginTop<span class="s"> = </span>(offset<span class="s"> || </span><span class="d">0</span>)<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1214"><span class="ln">1214</span>                },
+</code><code id="L1215"><span class="ln">1215</span>                
+</code><code id="L1216"><span class="ln">1216</span>                middle: <b>function</b>(b, pb, offset) {
+</code><code id="L1217"><span class="ln">1217</span>                    <b>this</b>.style.marginTop<span class="s"> = </span>(((pb.height<span class="s"> - </span>b.height) >> <span class="d">1</span>)<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1218"><span class="ln">1218</span>                },
+</code><code id="L1219"><span class="ln">1219</span>                
+</code><code id="L1220"><span class="ln">1220</span>                bottom: <b>function</b>(b, pb, offset) {
+</code><code id="L1221"><span class="ln">1221</span>                    <b>this</b>.style.marginTop<span class="s"> = </span>(pb.height<span class="s"> - </span>b.height<span class="s"> + </span>(offset<span class="s"> || </span><span class="d">0</span>))<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1222"><span class="ln">1222</span>                }
+</code><code id="L1223"><span class="ln">1223</span>            };
+</code><code id="L1224"><span class="ln">1224</span>        
+</code><code id="L1225"><span class="ln">1225</span>        <b>function</b> create(tag, attributes, css) {
+</code><code id="L1226"><span class="ln">1226</span>            <b>var</b> element<span class="s"> = </span>document.createElement(tag), key;
+</code><code id="L1227"><span class="ln">1227</span>            
+</code><code id="L1228"><span class="ln">1228</span>            <span class="c">// iterate through the attributes</span>
+</code><code id="L1229"><span class="ln">1229</span>            <b>for</b> (key <b>in</b> attributes) {
+</code><code id="L1230"><span class="ln">1230</span>                <b>if</b> (attributes.hasOwnProperty(key)) {
+</code><code id="L1231"><span class="ln">1231</span>                    element[key]<span class="s"> = </span>attributes[key];
+</code><code id="L1232"><span class="ln">1232</span>                } 
+</code><code id="L1233"><span class="ln">1233</span>            } 
+</code><code id="L1234"><span class="ln">1234</span>            
+</code><code id="L1235"><span class="ln">1235</span>            <b>for</b> (key <b>in</b> css) {
+</code><code id="L1236"><span class="ln">1236</span>                <b>if</b> (css.hasOwnProperty(key)) {
+</code><code id="L1237"><span class="ln">1237</span>                    element.style[key]<span class="s"> = </span>css[key];
+</code><code id="L1238"><span class="ln">1238</span>                }
+</code><code id="L1239"><span class="ln">1239</span>            }
+</code><code id="L1240"><span class="ln">1240</span>            
+</code><code id="L1241"><span class="ln">1241</span>            <b>return</b> element;
+</code><code id="L1242"><span class="ln">1242</span>        } <span class="c">// createEl</span>
+</code><code id="L1243"><span class="ln">1243</span>        
+</code><code id="L1244"><span class="ln">1244</span>        <b>function</b> position(element, alignment) {
+</code><code id="L1245"><span class="ln">1245</span>            <span class="c">// <b>if</b> we have an element and a containing node, then process</span>
+</code><code id="L1246"><span class="ln">1246</span>            <b>if</b> (element<span class="s"> &amp;&amp; </span>element.parentNode) {
+</code><code id="L1247"><span class="ln">1247</span>                <b>var</b> aligns<span class="s"> = </span>(alignment<span class="s"> || </span><i>''</i>).split(_reWhitespace),
+</code><code id="L1248"><span class="ln">1248</span>                    alignA<span class="s"> = </span>_reAlignOffset.exec(aligns[<span class="d">0</span>])<span class="s"> || </span>[, <i>'left'</i>, <span class="d">0</span>],
+</code><code id="L1249"><span class="ln">1249</span>                    alignB<span class="s"> = </span>_reAlignOffset.exec(aligns[<span class="d">1</span>])<span class="s"> || </span>[, <i>'top'</i>, <span class="d">0</span>],
+</code><code id="L1250"><span class="ln">1250</span>                    alignerA<span class="s"> = </span>_aligners[alignA[<span class="d">1</span>]]<span class="s"> || </span>_aligners.left,
+</code><code id="L1251"><span class="ln">1251</span>                    alignerB<span class="s"> = </span>_aligners[alignB[<span class="d">1</span>]]<span class="s"> || </span>_aligners.top,
+</code><code id="L1252"><span class="ln">1252</span>                    bounds<span class="s"> = </span>element.getBoundingClientRect(),
+</code><code id="L1253"><span class="ln">1253</span>                    parentBounds<span class="s"> = </span>element.parentNode.getBoundingClientRect();
+</code><code id="L1254"><span class="ln">1254</span>                
+</code><code id="L1255"><span class="ln">1255</span>                <span class="c">// set the position to absolute</span>
+</code><code id="L1256"><span class="ln">1256</span>                element.style.position<span class="s"> = </span><i>'absolute'</i>;
+</code><code id="L1257"><span class="ln">1257</span>                
+</code><code id="L1258"><span class="ln">1258</span>                <span class="c">// position the element</span>
+</code><code id="L1259"><span class="ln">1259</span>                alignerA.call(element, bounds, parentBounds, parseInt(alignA[<span class="d">2</span>], <span class="d">10</span>));
+</code><code id="L1260"><span class="ln">1260</span>                alignerB.call(element, bounds, parentBounds, parseInt(alignB[<span class="d">2</span>], <span class="d">10</span>));
+</code><code id="L1261"><span class="ln">1261</span>            }
+</code><code id="L1262"><span class="ln">1262</span>        } <span class="c">// position</span>
+</code><code id="L1263"><span class="ln">1263</span>        
+</code><code id="L1264"><span class="ln">1264</span>        <b>return</b> {
+</code><code id="L1265"><span class="ln">1265</span>            create: create,
+</code><code id="L1266"><span class="ln">1266</span>            position: position
+</code><code id="L1267"><span class="ln">1267</span>        };
+</code><code id="L1268"><span class="ln">1268</span>    })();
+</code><code id="L1269"><span class="ln">1269</span>
+</code><code id="L1270"><span class="ln">1270</span>    
+</code><code id="L1271"><span class="ln">1271</span><span class="c">    <span class="c"><span class="c">/* internals</span> */</span></span>
+</code><code id="L1272"><span class="ln">1272</span>    
+</code><code id="L1273"><span class="ln">1273</span>    <b>var</b> _classMC<span class="s"> = </span><i>'mc-controls'</i>,
+</code><code id="L1274"><span class="ln">1274</span>        _registry<span class="s"> = </span>{};
+</code><code id="L1275"><span class="ln">1275</span>    
+</code><code id="L1276"><span class="ln">1276</span>    <b>function</b> getControlsLayer(target) {
+</code><code id="L1277"><span class="ln">1277</span>        <span class="c">// look <b>for</b> a controls layer within the target</span>
+</code><code id="L1278"><span class="ln">1278</span>        <b>var</b> results<span class="s"> = </span>target.getElementsByClassName(_classMC),
+</code><code id="L1279"><span class="ln">1279</span>            controlLayer<span class="s"> = </span>results[<span class="d">0</span>];
+</code><code id="L1280"><span class="ln">1280</span>
+</code><code id="L1281"><span class="ln">1281</span>        <span class="c">// <b>if</b> we don't have a control layer, then create one</span>
+</code><code id="L1282"><span class="ln">1282</span>        <b>if</b> (! controlLayer) {
+</code><code id="L1283"><span class="ln">1283</span>            <b>var</b> targetBounds<span class="s"> = </span>target.getBoundingClientRect();
+</code><code id="L1284"><span class="ln">1284</span>            
+</code><code id="L1285"><span class="ln">1285</span>            controlLayer<span class="s"> = </span>_dom.create(<i>'div'</i>, { className: _classMC }, {
+</code><code id="L1286"><span class="ln">1286</span>                position: <i>'absolute'</i>,
+</code><code id="L1287"><span class="ln">1287</span>                width: targetBounds.width<span class="s"> + </span><i>'px'</i>,
+</code><code id="L1288"><span class="ln">1288</span>                height: targetBounds.height<span class="s"> + </span><i>'px'</i>,
+</code><code id="L1289"><span class="ln">1289</span>                <i>'z-index'</i>: <span class="d">1000</span>
+</code><code id="L1290"><span class="ln">1290</span>            });
+</code><code id="L1291"><span class="ln">1291</span>            
+</code><code id="L1292"><span class="ln">1292</span>            <span class="c">// add to the target</span>
+</code><code id="L1293"><span class="ln">1293</span>            target.appendChild(controlLayer);
+</code><code id="L1294"><span class="ln">1294</span>        } <span class="c">// <b>if</b></span>
+</code><code id="L1295"><span class="ln">1295</span>
+</code><code id="L1296"><span class="ln">1296</span>        <b>return</b> controlLayer;
+</code><code id="L1297"><span class="ln">1297</span>    } <span class="c">// getControlsLayer</span>
+</code><code id="L1298"><span class="ln">1298</span>    
+</code><code id="L1299"><span class="ln">1299</span>    <b>function</b> positionControl(target, control, opts) {
+</code><code id="L1300"><span class="ln">1300</span>        <span class="c">// <b>if</b> we have a control that wants to display full size, then match the container size</span>
+</code><code id="L1301"><span class="ln">1301</span>        <b>if</b> (opts.fullsize) {
+</code><code id="L1302"><span class="ln">1302</span>            <b>var</b> rect<span class="s"> = </span>target.getBoundingClientRect();
+</code><code id="L1303"><span class="ln">1303</span>            
+</code><code id="L1304"><span class="ln">1304</span>            control.style.width<span class="s"> = </span>rect.width<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1305"><span class="ln">1305</span>            control.style.height<span class="s"> = </span>rect.height<span class="s"> + </span><i>'px'</i>;
+</code><code id="L1306"><span class="ln">1306</span>            opts.alignment<span class="s"> = </span><i>'top left'</i>;
+</code><code id="L1307"><span class="ln">1307</span>        }
+</code><code id="L1308"><span class="ln">1308</span>        
+</code><code id="L1309"><span class="ln">1309</span>        _dom.position(control, opts.alignment);
+</code><code id="L1310"><span class="ln">1310</span>        control.style.zIndex<span class="s"> = </span>opts.zindex<span class="s"> || </span><span class="d">1000</span>;
+</code><code id="L1311"><span class="ln">1311</span>    } <span class="c">// positionControl</span>
+</code><code id="L1312"><span class="ln">1312</span>    
+</code><code id="L1313"><span class="ln">1313</span><span class="c">    <span class="c"><span class="c">/* exports</span> */</span></span>
+</code><code id="L1314"><span class="ln">1314</span>    
+</code><code id="L1315"><span class="ln">1315</span><span class="c">    <span class="c">/*\</span>
+</span></code><code id="L1316"><span class="ln">1316</span><span class="c">    <span class="s"> * </span>MapControls.add
+</span></code><code id="L1317"><span class="ln">1317</span><span class="c">     [ <b>function</b> ]
+</span></code><code id="L1318"><span class="ln">1318</span><span class="c">     **
+</span></code><code id="L1319"><span class="ln">1319</span><span class="c">    <span class="s"> * </span>Add a <b>new</b> control of `controlType` to the specified `target` element.
+</span></code><code id="L1320"><span class="ln">1320</span><span class="c">     **
+</span></code><code id="L1321"><span class="ln">1321</span><span class="c">     > Arguments
+</span></code><code id="L1322"><span class="ln">1322</span><span class="c">     **
+</span></code><code id="L1323"><span class="ln">1323</span><span class="c">    <span class="s"> - </span>target (DOMElement) the element that the control will be added to
+</span></code><code id="L1324"><span class="ln">1324</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control we are creating
+</span></code><code id="L1325"><span class="ln">1325</span><span class="c">    <span class="s"> - </span>opts (object) options that will be passed onto the control
+</span></code><code id="L1326"><span class="ln">1326</span><span class="c">     **
+</span></code><code id="L1327"><span class="ln">1327</span><span class="c">    <span class="s"> = </span>(DOMElement) the dom element that contains the newly created control
+</span></code><code id="L1328"><span class="ln">1328</span><span class="c">     **
+</span></code><code id="L1329"><span class="ln">1329</span><span class="c">     > Options
+</span></code><code id="L1330"><span class="ln">1330</span><span class="c">     **
+</span></code><code id="L1331"><span class="ln">1331</span><span class="c">    <span class="s"> * </span>The following options are supported by most controls
+</span></code><code id="L1332"><span class="ln">1332</span><span class="c">     **
+</span></code><code id="L1333"><span class="ln">1333</span><span class="c">    <span class="s"> - </span>aggressiveCapture (<b>boolean</b>) whether or not Interact will prevent <b>default</b> events from firing after intercepting events
+</span></code><code id="L1334"><span class="ln">1334</span><span class="c">    <span class="s"> - </span>zindex (number) the CSS `z-index` value (<b>default</b>: <span class="d">1000</span>)
+</span></code><code id="L1335"><span class="ln">1335</span><span class="c">    \*/</span>
+</code><code id="L1336"><span class="ln">1336</span>    <b>function</b> add(target, controlType, opts) {
+</code><code id="L1337"><span class="ln">1337</span>        <span class="c">// ensure the options have been defined</span>
+</code><code id="L1338"><span class="ln">1338</span>        <span class="c">// (we pass these by reference)</span>
+</code><code id="L1339"><span class="ln">1339</span>        opts<span class="s"> = </span>opts<span class="s"> || </span>{};
+</code><code id="L1340"><span class="ln">1340</span>        
+</code><code id="L1341"><span class="ln">1341</span>        <span class="c">// get the control</span>
+</code><code id="L1342"><span class="ln">1342</span>        <b>var</b> control<span class="s"> = </span>get(controlType, opts);
+</code><code id="L1343"><span class="ln">1343</span>        <b>if</b> (control) {
+</code><code id="L1344"><span class="ln">1344</span>            <span class="c">// add the control to the target</span>
+</code><code id="L1345"><span class="ln">1345</span>            target.appendChild(control.element);
+</code><code id="L1346"><span class="ln">1346</span>            
+</code><code id="L1347"><span class="ln">1347</span>            <span class="c">// position the control</span>
+</code><code id="L1348"><span class="ln">1348</span>            positionControl(target, control.element, opts);
+</code><code id="L1349"><span class="ln">1349</span>        }
+</code><code id="L1350"><span class="ln">1350</span>        
+</code><code id="L1351"><span class="ln">1351</span>        <b>return</b> control;
+</code><code id="L1352"><span class="ln">1352</span>    } <span class="c">// add</span>
+</code><code id="L1353"><span class="ln">1353</span>    
+</code><code id="L1354"><span class="ln">1354</span><span class="c">    <span class="c">/*\</span>
+</span></code><code id="L1355"><span class="ln">1355</span><span class="c">    <span class="s"> * </span>MapControls.get
+</span></code><code id="L1356"><span class="ln">1356</span><span class="c">     [ <b>function</b> ]
+</span></code><code id="L1357"><span class="ln">1357</span><span class="c">     **
+</span></code><code id="L1358"><span class="ln">1358</span><span class="c">    <span class="s"> * </span>Create a <b>new</b> control of `controlType`
+</span></code><code id="L1359"><span class="ln">1359</span><span class="c">     **
+</span></code><code id="L1360"><span class="ln">1360</span><span class="c">     > Arguments
+</span></code><code id="L1361"><span class="ln">1361</span><span class="c">     **
+</span></code><code id="L1362"><span class="ln">1362</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control we are creating
+</span></code><code id="L1363"><span class="ln">1363</span><span class="c">    <span class="s"> - </span>opts (object) options that will be passed onto the control
+</span></code><code id="L1364"><span class="ln">1364</span><span class="c">     **
+</span></code><code id="L1365"><span class="ln">1365</span><span class="c">    <span class="s"> = </span>(DOMElement) the dom element that contains the newly created control
+</span></code><code id="L1366"><span class="ln">1366</span><span class="c">     **
+</span></code><code id="L1367"><span class="ln">1367</span><span class="c">     > Options
+</span></code><code id="L1368"><span class="ln">1368</span><span class="c">     **
+</span></code><code id="L1369"><span class="ln">1369</span><span class="c">    <span class="s"> * </span>As per @MapControls.add
+</span></code><code id="L1370"><span class="ln">1370</span><span class="c">    \*/</span>
+</code><code id="L1371"><span class="ln">1371</span>    <b>function</b> get(controlType, opts) {
+</code><code id="L1372"><span class="ln">1372</span>        <b>var</b> creator<span class="s"> = </span>_registry[controlType];
+</code><code id="L1373"><span class="ln">1373</span>        <b>if</b> (creator) {
+</code><code id="L1374"><span class="ln">1374</span>            <b>return</b> creator.call(creator, opts);
+</code><code id="L1375"><span class="ln">1375</span>        }
+</code><code id="L1376"><span class="ln">1376</span>    } <span class="c">// get</span>
+</code><code id="L1377"><span class="ln">1377</span>    
+</code><code id="L1378"><span class="ln">1378</span><span class="c">    <span class="c">/*\</span>
+</span></code><code id="L1379"><span class="ln">1379</span><span class="c">    <span class="s"> * </span>MapControls.register
+</span></code><code id="L1380"><span class="ln">1380</span><span class="c">     [ <b>function</b> ]
+</span></code><code id="L1381"><span class="ln">1381</span><span class="c">     **
+</span></code><code id="L1382"><span class="ln">1382</span><span class="c">    <span class="s"> * </span>Register a <b>new</b> map control creator
+</span></code><code id="L1383"><span class="ln">1383</span><span class="c">     **
+</span></code><code id="L1384"><span class="ln">1384</span><span class="c">     > Arguments
+</span></code><code id="L1385"><span class="ln">1385</span><span class="c">     **
+</span></code><code id="L1386"><span class="ln">1386</span><span class="c">    <span class="s"> - </span>controlType (string) the type of control being registered
+</span></code><code id="L1387"><span class="ln">1387</span><span class="c">    <span class="s"> - </span>creator (<b>function</b>) the creator <b>function</b> called when a <b>new</b> control is requested
+</span></code><code id="L1388"><span class="ln">1388</span><span class="c">    \*/</span>
+</code><code id="L1389"><span class="ln">1389</span>    <b>function</b> register(controlType, creator) {
+</code><code id="L1390"><span class="ln">1390</span>        <span class="c">// register the control creator</span>
+</code><code id="L1391"><span class="ln">1391</span>        _registry[controlType]<span class="s"> = </span>creator;
+</code><code id="L1392"><span class="ln">1392</span>    } <span class="c">// register</span>
+</code><code id="L1393"><span class="ln">1393</span>    
+</code><code id="L1394"><span class="ln">1394</span>    <b>return</b> {
+</code><code id="L1395"><span class="ln">1395</span>        _createEl: _dom.create,
+</code><code id="L1396"><span class="ln">1396</span>        
+</code><code id="L1397"><span class="ln">1397</span>        add: add,
+</code><code id="L1398"><span class="ln">1398</span>        get: get,
+</code><code id="L1399"><span class="ln">1399</span>        register: register
+</code><code id="L1400"><span class="ln">1400</span>    };
+</code><code id="L1401"><span class="ln">1401</span>})();
 </code></body></html>

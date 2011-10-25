@@ -5,6 +5,7 @@ var interleave = require('interleave'),
         aliases: {
             'cog': 'github://DamonOehlman/cog/cogs/$1',
             'interact': 'github://DamonOehlman/interact/interact.js',
+            'classtweak': 'github://DamonOehlman/classtweak/classtweak.js',
             'eve': 'github://DmitryBaranovskiy/eve/eve.js'
         }
     };

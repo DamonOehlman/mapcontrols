@@ -6,7 +6,7 @@
  **
  > Options
  **
- * 
+ * autoRemove (boolean) whether or not the zoomrect should be autoremoved after a zoom operation
  **
  = (DOMElement) the dom element that contains the zoomrect
 \*/
@@ -31,6 +31,11 @@ MapControls.register('zoomrect', function(opts) {
     });
     
     eve.on('interact.pointer.down.' + id, function(evt, absXY, relXY) {
+        // if the box was not successfully removed before, do that now
+        if (box) {
+            zoomrect.removeChild(box);
+        }
+        
         // create our zoombox
         box = MapControls._createEl('div', { className: opts.className + '-box' }, {
             position: 'absolute',
@@ -56,5 +61,7 @@ MapControls.register('zoomrect', function(opts) {
         box = null;
     });
     
-    return zoomrect;
+    return {
+        element: zoomrect
+    };
 });

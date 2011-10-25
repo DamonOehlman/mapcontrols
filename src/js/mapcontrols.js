@@ -2,6 +2,10 @@ if (typeof INTERACT == 'undefined') {
     //= interact!
 }
 
+if (typeof classtweak == 'undefined') {
+    //= classtweak!
+}
+
 var MapControls = (function() {
     
     //= cog!dom
@@ -44,8 +48,8 @@ var MapControls = (function() {
             opts.alignment = 'top left';
         }
         
-        control.style['z-index'] = 1000;
         _dom.position(control, opts.alignment);
+        control.style.zIndex = opts.zindex || 1000;
     } // positionControl
     
     /* exports */
@@ -69,6 +73,7 @@ var MapControls = (function() {
      * The following options are supported by most controls
      **
      - aggressiveCapture (boolean) whether or not Interact will prevent default events from firing after intercepting events
+     - zindex (number) the CSS `z-index` value (default: 1000)
     \*/
     function add(target, controlType, opts) {
         // ensure the options have been defined
@@ -79,10 +84,10 @@ var MapControls = (function() {
         var control = get(controlType, opts);
         if (control) {
             // add the control to the target
-            target.appendChild(control);
+            target.appendChild(control.element);
             
             // position the control
-            positionControl(target, control, opts);
+            positionControl(target, control.element, opts);
         }
         
         return control;

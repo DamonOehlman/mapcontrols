@@ -1,0 +1,23 @@
+bwidth = 2px
+
+.mc-scale
+    width 120px
+    
+    & > div
+        border bwidth solid #333
+        height 10px
+        
+        &.mc-scale-0
+            border-top 0
+        
+        &.mc-scale-1
+            margin-top -(bwidth)
+            border-bottom 0
+            
+.mc-scale-label
+    position absolute
+    font 0.7em Helvetica, Arial, sans
+    padding 3px 5px
+    
+.mc-scale-label-0
+    margin-top -7px

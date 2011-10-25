@@ -1,4 +1,6 @@
 zoombar = url(../images/zoom.png)
+instart = -248px
+outstart = -296px
 
 .mc-zoom {
     background: zoombar;
@@ -6,15 +8,32 @@ zoombar = url(../images/zoom.png)
     height: 200px;
     
     &-btn {
-        height: 14px;
-        margin: 1px 0;
+        height 14px
+        margin 1px 0
+        display block
         
         &-in {
-            background: zoombar 0 -248px no-repeat;
+            background: zoombar 0 (instart - 16) no-repeat;
+            
+            &:hover {
+                background-position: 0 instart
+            }
+            
+            &:active {
+                background-position: 0 (instart - 32)
+            }
         }
         
         &-out {
-            background: zoombar 0 -296px no-repeat;
+            background: zoombar 0 (outstart - 16) no-repeat
+
+            &:hover {
+                background-position: 0 outstart
+            }
+            
+            &:active {
+                background-position: 0 (outstart - 32)
+            }
         }
     }
     
@@ -25,5 +44,6 @@ zoombar = url(../images/zoom.png)
     &-thumb {
         height: 16px;
         background: zoombar 0 -200px no-repeat;
+        display block
     }
 }

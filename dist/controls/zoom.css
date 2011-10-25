@@ -6,12 +6,25 @@
 .mc-zoom-btn {
   height: 14px;
   margin: 1px 0;
+  display: block;
 }
 .mc-zoom-btn-in {
-  background: url("../images/zoom.png") 0 -248px no-repeat;
+  background: url("../images/zoom.png") 0 -264px no-repeat;
+}
+.mc-zoom-btn-in:hover {
+  background-position: 0 -248px;
+}
+.mc-zoom-btn-in:active {
+  background-position: 0 -280px;
 }
 .mc-zoom-btn-out {
-  background: url("../images/zoom.png") 0 -296px no-repeat;
+  background: url("../images/zoom.png") 0 -312px no-repeat;
+}
+.mc-zoom-btn-out:hover {
+  background-position: 0 -296px;
+}
+.mc-zoom-btn-out:active {
+  background-position: 0 -328px;
 }
 .mc-zoom-slider {
   height: 166px;
@@ -19,4 +32,5 @@
 .mc-zoom-thumb {
   height: 16px;
   background: url("../images/zoom.png") 0 -200px no-repeat;
+  display: block;
 }
