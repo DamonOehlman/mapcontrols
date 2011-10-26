@@ -24,7 +24,8 @@ MapControls.register('scale', function(opts) {
     // initialise the zoombar element
     var scaleContainer = MapControls._createEl('div', { className: opts.className }),
         scales = {},
-        labels = {};
+        labels = {},
+        control;
 
     // create the scales
     for (var ii = 0; ii < opts.scales.length; ii++) {
@@ -43,7 +44,5 @@ MapControls.register('scale', function(opts) {
         scaleContainer.appendChild(scales[scaleName]);
     }
 
-    return {
-        element: scaleContainer
-    };
+    return control = MapControls._init(scaleContainer);
 });

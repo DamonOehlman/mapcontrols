@@ -61,7 +61,5 @@ MapControls.register('zoomrect', function(opts) {
         box = null;
     });
     
-    return {
-        element: zoomrect
-    };
+    return MapControls._init(zoomrect);
 });

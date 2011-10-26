@@ -9,6 +9,7 @@ if (typeof classtweak == 'undefined') {
 var MapControls = (function() {
     
     //= cog!dom
+    //= controls/base
     
     /* internals */
     
@@ -53,6 +54,10 @@ var MapControls = (function() {
     } // positionControl
     
     /* exports */
+    
+    function _init(element, opts, methods) {
+        return new Control(element, opts);
+    } // _init
     
     /*\
      * MapControls.add
@@ -135,6 +140,7 @@ var MapControls = (function() {
     
     return {
         _createEl: _dom.create,
+        _init: _init,
         
         add: add,
         get: get,

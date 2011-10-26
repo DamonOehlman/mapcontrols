@@ -26,6 +26,7 @@ outstart = -296px
         
         &-out {
             background: zoombar 0 (outstart - 16) no-repeat
+            margin-top 14px
 
             &:hover {
                 background-position: 0 outstart
@@ -38,12 +39,14 @@ outstart = -296px
     }
     
     &-slider {
-        height: 166px;
+        height: 154px;
     }
     
     &-thumb {
         height: 16px;
         background: zoombar 0 -200px no-repeat;
         display block
+        position absolute
+        width 100%
     }
 }

@@ -30,6 +30,15 @@ MapControls.register('zoom', function(opts) {
         
         return output.join(' ');
     } // genClasses
+    
+    function updateThumbPos(value) {
+        var range = opts.max - opts.min,
+            progress = value - opts.min;
+            
+        // update the slider height
+        sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
+        thumb.style.marginTop = (sliderHeight - (progress / range * sliderHeight)) + 'px';
+    } // updateThumbPos
 
     // initialise the zoombar element
     var id = 'zoombar_' + new Date().getTime(),
@@ -41,12 +50,11 @@ MapControls.register('zoom', function(opts) {
         slider = MapControls._createEl('div', {
             className: genClasses('slider')
         }), 
-        thumb;
+        thumb, control, thumbStart = 0, sliderHeight;
         
     // add a thumb to the slider
     slider.appendChild(thumb = MapControls._createEl('a', {
-        className: genClasses('thumb'),
-        position: 'absolute'
+        className: genClasses('thumb')
     }));
     
     // add the zoom out button
@@ -70,13 +78,15 @@ MapControls.register('zoom', function(opts) {
     eve.on('interact.pointer.down.' + id, function(evt, absXY, relXY) {
         if (evt.target === thumb) {
             startY = relXY.y;
+            thumbStart = parseInt(thumb.style.marginTop, 10) || 0;
         }
     });
 
     eve.on('interact.pointer.move.' + id, function(evt, absXY, relXY) {
         if (typeof startY != 'undefined') {
-            var diffY = relXY.y - startY;
-            console.log(diffY);
+            sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
+            thumb.style.marginTop = Math.min(
+                sliderHeight, Math.max(0, thumbStart + relXY.y - startY)) + 'px';
         }
     });
     
@@ -84,8 +94,13 @@ MapControls.register('zoom', function(opts) {
         startY = undefined;
     });
     
-    // return the zoombar
-    return {
-        element: zoombar
-    };
+    // create the control
+    control = MapControls._init(zoombar);
+    
+    // handle control level events
+    control.on('change.value', function(prop, value) {
+        updateThumbPos(value);
+    });
+    
+    return control;
 });

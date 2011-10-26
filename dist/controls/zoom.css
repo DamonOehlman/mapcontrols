@@ -19,6 +19,7 @@
 }
 .mc-zoom-btn-out {
   background: url("../images/zoom.png") 0 -312px no-repeat;
+  margin-top: 14px;
 }
 .mc-zoom-btn-out:hover {
   background-position: 0 -296px;
@@ -27,10 +28,12 @@
   background-position: 0 -328px;
 }
 .mc-zoom-slider {
-  height: 166px;
+  height: 154px;
 }
 .mc-zoom-thumb {
   height: 16px;
   background: url("../images/zoom.png") 0 -200px no-repeat;
   display: block;
+  position: absolute;
+  width: 100%;
 }
