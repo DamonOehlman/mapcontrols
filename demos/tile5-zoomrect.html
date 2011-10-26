@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tile5 + Zoombar</title>
+	<script src="lib/tile5/tile5.cloudmade.js"></script>
+	<link rel="stylesheet" href="../dist/controls/zoomrect.css" />
+</head>
+<body>
+<div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
+<script src="../dist/mapcontrols.js"></script>
+<script src="../dist/controls/zoomrect.js"></script>
+<script>
+MapControls.add(document.getElementById('map'), 'zoomrect');
+
+var map = new T5.Map('map');
+
+map.layer('tiles', 'tile', {
+    generator: 'osm.cloudmade',
+    // demo api key, register for an API key at http://dev.cloudmade.com/
+    apikey: '30b4bdd55d3b4c4d9a692cbd02b8e8a8'
+});
+
+map.zoom(8).center('-27.4695 153.0201');
+</script>
+</body>
+</html>
