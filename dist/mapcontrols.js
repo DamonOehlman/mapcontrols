@@ -1290,6 +1290,14 @@ var MapControls = (function() {
         }
     };
     
+    Control.prototype.remove = function() {
+        if (this.element && this.element.parentNode) {
+            this.element.parentNode.removeChild(this.element);
+        }
+        
+        eve('mapcontrols.remove.' + this.id);
+    }; // remove
+    
     Control.prototype.set = function(prop, value, triggerChange) {
         if (this[prop] !== value) {
             this[prop] = value;
@@ -1342,20 +1350,20 @@ var MapControls = (function() {
     /* exports */
     
     function _calcRadsPerPixel(bounds, vp) {
-        var min = bounds.min || bounds.sw || {},
-            max = bounds.max || bounds.ne || {},
-            minLat = (min.lat || 0) * D2R,
-            minLon = (min.lon || min.lng || 0) * D2R,
-            maxLat = (max.lat || 0) * D2R,
-            maxLon = (max.lon || max.lng || 0) * D2R;
+        // normalize the bounds
+        bounds = _normalizeBounds(bounds);
         
         if (vp && vp.width && vp.height) {
-            var dLat = maxLat - minLat,
-                centerLat = minLat + dLat / 2;
+            var dLat = bounds.maxlat - bounds.minlat,
+                centerLat = bounds.minlat + dLat / 2;
             
             return {
-                x: _haversineDist(centerLat, minLon, centerLat, maxLon) / vp.width,
-                y: _haversineDist(minLat, minLon, maxLat, minLon) / vp.height
+                x: _haversineDist(
+                        centerLat, bounds.minlon, 
+                        centerLat, bounds.maxlon) / vp.width,
+                y: _haversineDist(
+                        bounds.minlat, bounds.minlon,
+                        bounds.maxlat, bounds.minlon) / vp.height
             };
         }
         
@@ -1364,6 +1372,22 @@ var MapControls = (function() {
     function _init(element, opts, methods) {
         return new Control(element, opts);
     } // _init
+    
+    function _normalizeBounds(bounds) {
+        var min = bounds.min || bounds.sw || {},
+            max = bounds.max || bounds.ne || {},
+            minLat = (bounds.minlat || min.lat || 0) * D2R,
+            minLon = (bounds.minlon || min.lon || min.lng || 0) * D2R,
+            maxLat = (bounds.maxlat || max.lat || 0) * D2R,
+            maxLon = (bounds.maxlon || max.lon || max.lng || 0) * D2R;
+        
+        return {
+            minlat: minLat,
+            minlon: minLon,
+            maxlat: maxLat,
+            maxlon: maxLon
+        };
+    } // _normalizeBounds
     
     /*\
      * MapControls.add
@@ -1458,6 +1482,7 @@ var MapControls = (function() {
         _calcRadsPerPixel: _calcRadsPerPixel,
         _createEl: _dom.create,
         _init: _init,
+        _normalizeBounds: _normalizeBounds,
         
         add: add,
         get: get,

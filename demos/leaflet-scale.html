@@ -34,6 +34,7 @@ var cloudmade = new L.TileLayer(config.url, config),
 	
 map.on('viewreset', updateScale);
 map.on('drag', updateScale);
+updateScale();
 </script>
 </body>
 </html>

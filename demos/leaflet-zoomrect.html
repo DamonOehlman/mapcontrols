@@ -9,23 +9,55 @@
 	<link rel="stylesheet" href="../dist/controls/zoomrect.css" />
 </head>
 <body>
+	<button onclick="addZoomRect()" style="float: right">Add Zoom Rect</button>
 <div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
 <script src="../dist/mapcontrols.js"></script>
 <script src="../dist/controls/zoomrect.js"></script>
 <script type="text/javascript">
-MapControls.add(document.getElementById('map'), 'zoomrect', { 
-	// stop leaflet capturing events when we get one
-	aggressiveCapture: true
-});
+function addZoomRect() {
+	zoom = MapControls.add(document.getElementById('map'), 'zoomrect', {
+		aggressiveCapture: true,
+		autoRemove: true
+	});
+
+	zoom.on('change.zoombounds', function(prop, value) {
+		map.fitBounds(new L.LatLngBounds(
+			new L.LatLng(value.min.lat, value.min.lon),
+			new L.LatLng(value.max.lat, value.max.lon)
+		));
+	});
+	
+	zoom.on('remove', function() {
+		zoom = null;
+	});
+
+	updateBounds();
+}
+
+function updateBounds() {
+	var bounds = map.getBounds();
+	
+	if (zoom) {
+		zoom.set('bounds', {
+			min: bounds.getSouthWest(),
+			max: bounds.getNorthEast()
+		});
+	}
+}
 
 var cloudmade = new L.TileLayer(config.url, config),
 	latlng = new L.LatLng(-27.46837362209769, 153.02405834197998),
+	zoom,
 	map = new L.Map('map', {
 		center: latlng, 
 		zoom: 15,
 		zoomControl: false,
 		layers: [cloudmade]
 	});
+	
+map.on('viewreset', updateBounds);
+map.on('drag', updateBounds);
+updateBounds();
 </script>
 </body>
 </html>

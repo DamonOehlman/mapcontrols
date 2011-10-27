@@ -21,6 +21,14 @@ Control.prototype.getViewport = function() {
     }
 };
 
+Control.prototype.remove = function() {
+    if (this.element && this.element.parentNode) {
+        this.element.parentNode.removeChild(this.element);
+    }
+    
+    eve('mapcontrols.remove.' + this.id);
+}; // remove
+
 Control.prototype.set = function(prop, value, triggerChange) {
     if (this[prop] !== value) {
         this[prop] = value;
