@@ -15,6 +15,12 @@ function Control(element, opts) {
     this.id = this.id || (this.type + '_' + new Date().getTime());
 };
 
+Control.prototype.getViewport = function() {
+    if (this.element && this.element.parentNode) {
+        return this.element.parentNode.getBoundingClientRect();
+    }
+};
+
 Control.prototype.set = function(prop, value, triggerChange) {
     if (this[prop] !== value) {
         this[prop] = value;

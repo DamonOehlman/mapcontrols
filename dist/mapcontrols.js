@@ -1284,6 +1284,12 @@ var MapControls = (function() {
         this.id = this.id || (this.type + '_' + new Date().getTime());
     };
     
+    Control.prototype.getViewport = function() {
+        if (this.element && this.element.parentNode) {
+            return this.element.parentNode.getBoundingClientRect();
+        }
+    };
+    
     Control.prototype.set = function(prop, value, triggerChange) {
         if (this[prop] !== value) {
             this[prop] = value;
@@ -1304,31 +1310,20 @@ var MapControls = (function() {
     
     /* internals */
     
-    var _classMC = 'mc-controls',
+    var D2R = Math.PI / 180,
+        MAXLON = 360 * D2R,
+        _classMC = 'mc-controls',
         _registry = {};
-    
-    function getControlsLayer(target) {
-        // look for a controls layer within the target
-        var results = target.getElementsByClassName(_classMC),
-            controlLayer = results[0];
-
-        // if we don't have a control layer, then create one
-        if (! controlLayer) {
-            var targetBounds = target.getBoundingClientRect();
+        
+    function _haversineDist(lat1, lon1, lat2, lon2) {
+        // use the haversine formula to calculate distance: http://www.movable-type.co.uk/scripts/latlong.html
+        var dLon = (lon1 > lon2 ? MAXLON - lon1 + lon2 : lon2 - lon1),
+            dLat = lat2 - lat1,
+            a = Math.pow(Math.sin(dLat / 2), 2) + Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2),
+            c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             
-            controlLayer = _dom.create('div', { className: _classMC }, {
-                position: 'absolute',
-                width: targetBounds.width + 'px',
-                height: targetBounds.height + 'px',
-                'z-index': 1000
-            });
-            
-            // add to the target
-            target.appendChild(controlLayer);
-        } // if
-
-        return controlLayer;
-    } // getControlsLayer
+        return c;
+    }
     
     function positionControl(target, control, opts) {
         // if we have a control that wants to display full size, then match the container size
@@ -1345,6 +1340,26 @@ var MapControls = (function() {
     } // positionControl
     
     /* exports */
+    
+    function _calcRadsPerPixel(bounds, vp) {
+        var min = bounds.min || bounds.sw || {},
+            max = bounds.max || bounds.ne || {},
+            minLat = (min.lat || 0) * D2R,
+            minLon = (min.lon || min.lng || 0) * D2R,
+            maxLat = (max.lat || 0) * D2R,
+            maxLon = (max.lon || max.lng || 0) * D2R;
+        
+        if (vp && vp.width && vp.height) {
+            var dLat = maxLat - minLat,
+                centerLat = minLat + dLat / 2;
+            
+            return {
+                x: _haversineDist(centerLat, minLon, centerLat, maxLon) / vp.width,
+                y: _haversineDist(minLat, minLon, maxLat, minLon) / vp.height
+            };
+        }
+        
+    }
     
     function _init(element, opts, methods) {
         return new Control(element, opts);
@@ -1440,6 +1455,7 @@ var MapControls = (function() {
     } // register
     
     return {
+        _calcRadsPerPixel: _calcRadsPerPixel,
         _createEl: _dom.create,
         _init: _init,
         
