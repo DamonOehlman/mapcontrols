@@ -6,15 +6,14 @@
 	<link rel="stylesheet" href="../dist/controls/zoom.css" />
 </head>
 <body>
-<div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
+	<div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
 <script src="../dist/mapcontrols.js"></script>
 <script src="../dist/controls/zoom.js"></script>
 <script>
 var zoom = MapControls.add(document.getElementById('map'), 'zoom', { 
-	alignment: 'right-10 middle'
-});
-
-var map = new T5.Map('map');
+		alignment: 'right-10 middle'
+	}),
+	map = new T5.Map('map');
 
 map.layer('tiles', 'tile', {
     generator: 'osm.cloudmade',
@@ -28,7 +27,7 @@ map.bind('zoom', function(evt, level) {
 
 map.zoom(8).center('-27.4695 153.0201');
 
-zoom.on('change.value', function(value) {
+zoom.on('change.value', function(prop, value) {
 	map.zoom(value);
 });
 </script>

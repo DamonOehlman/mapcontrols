@@ -13,20 +13,25 @@
 <script src="../dist/mapcontrols.js"></script>
 <script src="../dist/controls/zoom.js"></script>
 <script type="text/javascript">
-MapControls.add(document.getElementById('map'), 'zoom', { 
-	alignment: 'right-10 middle',
-	// stop leaflet capturing events when we get one
-	aggressiveCapture: true
-});
-
 var cloudmade = new L.TileLayer(config.url, config),
 	latlng = new L.LatLng(-27.46837362209769, 153.02405834197998),
+	zoom = MapControls.add(document.getElementById('map'), 'zoom', { 
+		alignment: 'right-10 middle'
+	}),
 	map = new L.Map('map', {
 		center: latlng, 
 		zoom: 15,
 		zoomControl: false,
 		layers: [cloudmade]
 	});
+	
+map.on('viewreset', function(type, target) {
+	zoom.set('value', map.getZoom());
+});
+
+zoom.set('value', map.getZoom()).on('change.value', function(prop, value) {
+	map.setZoom(value);
+});
 </script>
 </body>
 </html>

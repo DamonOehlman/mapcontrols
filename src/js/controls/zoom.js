@@ -22,6 +22,11 @@ MapControls.register('zoom', function(opts) {
     opts.min = opts.min || 1;
     opts.max = opts.max || 17;
     
+    function _changeVal(newVal) {
+        newVal = Math.min(opts.max, Math.max(opts.min, newVal));
+        control.set('value', newVal);
+    } // _changeVal
+    
     function genClasses() {
         var output = [];
         for (var ii = 0; ii < arguments.length; ii++) {
@@ -49,7 +54,8 @@ MapControls.register('zoom', function(opts) {
         }),
         slider = MapControls._createEl('div', {
             className: genClasses('slider')
-        }), 
+        }),
+        reBtnIn = /btn\-in(?:\s|$)/,
         thumb, control, thumbStart = 0, sliderHeight;
         
     // add a thumb to the slider
@@ -76,11 +82,16 @@ MapControls.register('zoom', function(opts) {
     });
     
     eve.on('interact.pointer.down.' + id, function(evt, absXY, relXY) {
-        if (evt.target === thumb) {
+        var el = evt.target || evt.srcElement;
+        
+        if (el === thumb) {
             startY = relXY.y;
             thumbStart = parseInt(thumb.style.marginTop, 10) || 0;
         }
-    });
+        else if (el && el.tagName === 'A') {
+            _changeVal(control.value + (reBtnIn.test(el.className) ? 1 : -1));
+        }
+    })(-1);
 
     eve.on('interact.pointer.move.' + id, function(evt, absXY, relXY) {
         if (typeof startY != 'undefined') {
@@ -88,11 +99,21 @@ MapControls.register('zoom', function(opts) {
             thumb.style.marginTop = Math.min(
                 sliderHeight, Math.max(0, thumbStart + relXY.y - startY)) + 'px';
         }
-    });
+    })(-1);
     
     eve.on('interact.pointer.up.' + id, function(evt, absXY, relXY) {
+        // if we are dragging the thumb, then calculate the zoom
+        if (startY) {
+            sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
+
+            var range = opts.max - opts.min,
+                thumbVal = (sliderHeight - parseInt(thumb.style.marginTop, 10)) / sliderHeight;
+
+            _changeVal((thumbVal * range | 0) + opts.min);
+        }
+        
         startY = undefined;
-    });
+    })(-1);
     
     // create the control
     control = MapControls._init(zoombar);

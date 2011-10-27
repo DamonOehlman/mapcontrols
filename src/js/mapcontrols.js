@@ -79,6 +79,7 @@ var MapControls = (function() {
      **
      - aggressiveCapture (boolean) whether or not Interact will prevent default events from firing after intercepting events
      - zindex (number) the CSS `z-index` value (default: 1000)
+     - prepend (boolean) whether the control should be prepended in the DOM
     \*/
     function add(target, controlType, opts) {
         // ensure the options have been defined
@@ -87,9 +88,18 @@ var MapControls = (function() {
         
         // get the control
         var control = get(controlType, opts);
-        if (control) {
-            // add the control to the target
-            target.appendChild(control.element);
+        if (control && target) {
+            // get the first child in the target
+            var firstChild = target.childNodes[0];
+            
+            // if we have a first child, insert the control before
+            if (firstChild && opts.prepend) {
+                target.insertBefore(control.element, firstChild);
+            }
+            // otherwise, just append
+            else {
+                target.appendChild(control.element);
+            }
             
             // position the control
             positionControl(target, control.element, opts);
