@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GMaps + Zoom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+	<link rel="stylesheet" href="../dist/controls/scale.css" />
+    <style type="text/css">
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+
+      #map_canvas {
+		width: 800px;
+		height: 600px;
+	}
+    </style>
+  </head>
+  <body>
+    <div id="map_canvas"></div>
+	<script src="../dist/mapcontrols.js"></script>
+	<script src="../dist/controls/scale.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript">
+      var map;
+      function initialize() {
+		var container = document.getElementById('map_canvas'),
+			scale;
+	
+        map = new google.maps.Map(container,  {
+          zoom: 8,
+          center: new google.maps.LatLng(-34.397, 150.644),
+          disableDefaultUI: true,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+
+		google.maps.event.addListener(map, 'bounds_changed', function() {
+			var bounds = map.getBounds(),
+				min = bounds.getSouthWest(),
+				max = bounds.getNorthEast();
+			
+			scale.set('bounds', {
+				min: { lat: min.lat(), lng: min.lng() },
+				max: { lat: max.lat(), lng: max.lng() }
+			});
+		});
+
+		scale = MapControls.add(container, 'scale', {
+			alignment: 'left+5 bottom-35'
+		});
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </body>
+</html>

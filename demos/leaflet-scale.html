@@ -13,17 +13,27 @@
 <script src="../dist/mapcontrols.js"></script>
 <script src="../dist/controls/scale.js"></script>
 <script type="text/javascript">
+function updateScale() {
+	var bounds = map.getBounds();
+	
+	scale.set('bounds', {
+		min: bounds.getSouthWest(),
+		max: bounds.getNorthEast()
+	});
+}
+
 var cloudmade = new L.TileLayer(config.url, config),
 	latlng = new L.LatLng(-27.46837362209769, 153.02405834197998),
+	scale = MapControls.add(document.getElementById('map'), 'scale'),
 	map = new L.Map('map', {
 		center: latlng, 
 		zoom: 15,
 		zoomControl: false,
 		layers: [cloudmade]
 	});
-
-MapControls.add(document.getElementById('map'), 'scale', {
-});
+	
+map.on('viewreset', updateScale);
+map.on('drag', updateScale);
 </script>
 </body>
 </html>
