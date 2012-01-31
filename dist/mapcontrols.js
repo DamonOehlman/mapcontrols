@@ -1,13 +1,13 @@
 if (typeof INTERACT == 'undefined') {
     // ┌──────────────────────────────────────────────────────────────────────────────────────┐ \\
-    // │ Eve 0.3.2 - JavaScript Events Library                                                │ \\
+    // │ Eve 0.3.3 - JavaScript Events Library                                                │ \\
     // ├──────────────────────────────────────────────────────────────────────────────────────┤ \\
     // │ Copyright (c) 2008-2011 Dmitry Baranovskiy (http://dmitry.baranovskiy.com/)          │ \\
     // │ Licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) license. │ \\
     // └──────────────────────────────────────────────────────────────────────────────────────┘ \\
     
     (function (glob) {
-        var version = "0.3.2",
+        var version = "0.3.3",
             has = "hasOwnProperty",
             separator = /[\.\/]/,
             wildcard = "*",
@@ -151,13 +151,13 @@ if (typeof INTERACT == 'undefined') {
          - name (string) name of the event, dot (`.`) or slash (`/`) separated, with optional wildcards
          - f (function) event handler function
          **
-         = (function) returned function accept one number parameter that represents z-index of the handler. It is optional feature and only used when you need to ensure that some subset of handlers will be invoked in a given order, despite of the order of assignment. 
+         = (function) returned function accepts a single numeric parameter that represents z-index of the handler. It is an optional feature and only used when you need to ensure that some subset of handlers will be invoked in a given order, despite of the order of assignment. 
          > Example:
          | eve.on("mouse", eat)(2);
          | eve.on("mouse", scream);
          | eve.on("mouse", catch)(1);
          * This will ensure that `catch` function will be called before `eat`.
-         * If you want to put you hadler before not indexed handlers specify negative value.
+         * If you want to put your handler before non-indexed handlers, specify a negative value.
          * Note: I assume most of the time you don’t need to worry about z-index, but it’s nice to have this feature “just in case”.
         \*/
         eve.on = function (name, f) {
@@ -183,7 +183,7 @@ if (typeof INTERACT == 'undefined') {
          * eve.stop
          [ method ]
          **
-         * Is used inside event handler to stop event
+         * Is used inside an event handler to stop the event, preventing any subsequent listeners from firing.
         \*/
         eve.stop = function () {
             stop = 1;
@@ -224,9 +224,10 @@ if (typeof INTERACT == 'undefined') {
                 e,
                 key,
                 splice,
+                i, ii, j, jj,
                 cur = [events];
-            for (var i = 0, ii = names.length; i < ii; i++) {
-                for (var j = 0; j < cur.length; j += splice.length - 2) {
+            for (i = 0, ii = names.length; i < ii; i++) {
+                for (j = 0; j < cur.length; j += splice.length - 2) {
                     splice = [j, 1];
                     e = cur[j].n;
                     if (names[i] != wildcard) {
@@ -271,6 +272,32 @@ if (typeof INTERACT == 'undefined') {
             }
         };
         /*\
+         * eve.once
+         [ method ]
+         **
+         * Binds given event handler with a given name to only run once then unbind itself.
+         | eve.once("login", f);
+         | eve("login"); // triggers f
+         | eve("login"); // no listeners
+         * Use @eve to trigger the listener.
+         **
+         > Arguments
+         **
+         - name (string) name of the event, dot (`.`) or slash (`/`) separated, with optional wildcards
+         - f (function) event handler function
+         **
+         = (function) same return function as @eve.on
+        \*/
+        eve.once = function (name, f) {
+            var f2 = function () {
+                var res = f.apply(this, arguments);
+                eve.unbind(name, f2);
+    
+                return res;
+            };
+            return eve.on(name, f2);
+        };
+        /*\
          * eve.version
          [ property (string) ]
          **
@@ -280,8 +307,10 @@ if (typeof INTERACT == 'undefined') {
         eve.toString = function () {
             return "You are running Eve " + version;
         };
-        (typeof module != "undefined" && module.exports) ? (module.exports = eve) : (glob.eve = eve);
+        (typeof module != "undefined" && module.exports) ? (module.exports = eve) :
+            (typeof define != "undefined" ? (define('eve', [], function() { return eve; })) : (glob.eve = eve));
     })(this);
+    
     
     
     // Interact 0.3.0 - Mouse and Touch Handling
@@ -436,7 +465,7 @@ if (typeof INTERACT == 'undefined') {
         } // getOffset
         
         function matchTarget(evt, targetElement) {
-            var targ = evt.target ? evt.target : evt.srcElement,
+            var targ = evt.target || evt.srcElement,
                 targClass = targ.className;
             
             // while we have a target, and that target is not the target element continue
@@ -1069,7 +1098,6 @@ if (typeof INTERACT == 'undefined') {
             watch: watch
         };
     })();
-    
     
 
 }

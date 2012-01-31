@@ -2,7 +2,7 @@ CWD=`pwd`
 
 build:
 	@cp -r src/images dist
-	@node build
+	@jake
 	
 test:
 	# node test/db.js
