@@ -95,6 +95,18 @@ MapControls.register('zoom', function(opts) {
 
     eve.on('interact.pointer.move.' + id, function(evt, absXY, relXY) {
         if (typeof startY != 'undefined') {
+            if (evt.preventDefault) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                
+                if (evt.stopImmediatePropagation) {
+                    evt.stopImmediatePropagation();
+                } // if
+            }
+            else if (typeof evt.cancelBubble != 'undefined') {
+                evt.cancelBubble = true;
+            } // if..else
+
             sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
             thumb.style.marginTop = Math.min(
                 sliderHeight, Math.max(0, thumbStart + relXY.y - startY)) + 'px';

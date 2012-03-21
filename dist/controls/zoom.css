@@ -7,6 +7,7 @@
   height: 14px;
   margin: 1px 0;
   display: block;
+  cursor: pointer;
 }
 .mc-zoom-btn-in {
   background: url("../images/zoom.png") 0 -264px no-repeat;
