@@ -77,7 +77,7 @@ MapControls.register('zoom', function(opts) {
     }));
     
     // watch the zoombar
-    INTERACT.watch(zoombar, {
+    interact.watch(zoombar, {
         aggressiveCapture: opts.aggressiveCapture
     });
     

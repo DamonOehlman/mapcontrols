@@ -1,11 +1,3 @@
-if (typeof INTERACT == 'undefined') {
-    //= interact!
-}
-
-if (typeof classtweak == 'undefined') {
-    //= classtweak!
-}
-
 var MapControls = (function() {
     
     //= cog!dom

@@ -31,7 +31,7 @@ MapControls.register('zoomrect', function(opts) {
         box, startXY;
     
     // watch the zoombar
-    INTERACT.watch(zoomrect, {
+    interact.watch(zoomrect, {
         aggressiveCapture: opts.aggressiveCapture
     });
     

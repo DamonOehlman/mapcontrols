@@ -3,7 +3,7 @@ var interleave = require('interleave'),
     path = require('path'),
     aliases = {
         'cog': 'github://DamonOehlman/cog/cogs/$1',
-        'interact': 'github://DamonOehlman/interact/dist/interact.js',
+        'interact': 'github://DamonOehlman/interact/interact.js',
         'classtweak': 'github://DamonOehlman/classtweak/classtweak.js',
         'eve': 'github://DmitryBaranovskiy/eve/eve.js'
     };
