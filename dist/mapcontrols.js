@@ -140,21 +140,7 @@ var MapControls = (function() {
             
         return c;
     }
-    
-    function positionControl(target, control, opts) {
-        // if we have a control that wants to display full size, then match the container size
-        if (opts.fullsize) {
-            var rect = target.getBoundingClientRect();
-            
-            control.style.width = rect.width + 'px';
-            control.style.height = rect.height + 'px';
-            opts.alignment = 'top left';
-        }
-        
-        _dom.position(control, opts.alignment);
-        control.style.zIndex = opts.zindex || 1000;
-    } // positionControl
-    
+
     /* exports */
     
     function _calcRadsPerPixel(bounds, vp) {
@@ -270,6 +256,28 @@ var MapControls = (function() {
         }
     } // get
     
+    function positionControl(target, control, opts) {
+        // ensure we have valid opts
+        opts = opts || control._posOpts || {};
+        
+        // if we have a control that wants to display full size, then match the container size
+        if (opts.fullsize) {
+            var rect = target.getBoundingClientRect();
+            
+            control.style.width = rect.width + 'px';
+            control.style.height = rect.height + 'px';
+            opts.alignment = 'top left';
+        }
+        
+        _dom.position(control, opts.alignment);
+        control.style.zIndex = opts.zindex || 1000;
+        
+        // save the position options in the control 
+        if (! control._posOpts) {
+            control._posOpts = opts;
+        }
+    } // positionControl
+    
     /*\
      * MapControls.register
      [ function ]
@@ -294,6 +302,7 @@ var MapControls = (function() {
         
         add: add,
         get: get,
+        positionControl: positionControl,
         register: register
     };
 })();
