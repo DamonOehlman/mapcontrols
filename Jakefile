@@ -2,10 +2,7 @@ var interleave = require('interleave'),
     fs = require('fs'),
     path = require('path'),
     aliases = {
-        'cog': 'github://DamonOehlman/cog/cogs/$1',
-        'interact': 'github://DamonOehlman/interact/interact.js',
-        'classtweak': 'github://DamonOehlman/classtweak/classtweak.js',
-        'eve': 'github://DmitryBaranovskiy/eve/eve.js'
+        'snippets': 'github://DamonOehlman/snippets/$1'
     };
     
 desc('build the core files');

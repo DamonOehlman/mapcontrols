@@ -1,7 +1,7 @@
 var MapControls = (function() {
     
-    //= cog!dom
     //= controls/base
+    //= snippets!dom/create-element
     
     /* internals */
     
@@ -148,7 +148,7 @@ var MapControls = (function() {
             opts.alignment = 'top left';
         }
         
-        _dom.position(control, opts.alignment);
+        alignit(control, opts.alignment);
         control.style.zIndex = opts.zindex || 1000;
         
         // save the position options in the control 
@@ -175,7 +175,7 @@ var MapControls = (function() {
     
     return {
         _calcRadsPerPixel: _calcRadsPerPixel,
-        _createEl: _dom.create,
+        _createEl: createElement,
         _init: _init,
         _normalizeBounds: _normalizeBounds,
         
