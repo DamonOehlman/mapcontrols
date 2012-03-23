@@ -105,6 +105,7 @@ var MapControls = (function() {
             };
         }
         
+        return { x: 0, y: 0 };
     }
     
     function _init(element, opts, methods) {
