@@ -19,7 +19,7 @@ var MapControls = (function() {
     
     Control.prototype.getViewport = function() {
         if (this.element && this.element.parentNode) {
-            return this.element.parentNode.getBoundingClientRect();
+            return alignit.bounds(this.element.parentNode);
         }
     };
     
@@ -206,7 +206,7 @@ var MapControls = (function() {
         
         // if we have a control that wants to display full size, then match the container size
         if (opts.fullsize) {
-            var rect = target.getBoundingClientRect();
+            var rect = alignit.bounds(target);
             
             control.style.width = rect.width + 'px';
             control.style.height = rect.height + 'px';

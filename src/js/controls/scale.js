@@ -46,7 +46,7 @@ MapControls.register('scale', function(opts) {
     function _updateScale(key, kmPerPixel) {
         // determine the maximum available size
         var unitsPerPixel = kmPerPixel * unitConversions[key],
-            containerWidth = scaleContainer.getBoundingClientRect().width,
+            containerWidth = alignit.bounds(scaleContainer).width,
             maxWidth = containerWidth * unitsPerPixel,
             widthExp = Math.floor(Math.log(maxWidth) / Math.log(10)),
             scaleWidth,

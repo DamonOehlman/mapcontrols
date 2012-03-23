@@ -83,7 +83,7 @@ MapControls.register('zoomrect', function(opts) {
     eve.on('interact.pointer.up.' + id, function(evt, absXY, relXY) {
         if (currentBounds) {
             // get the box dimensions
-            var rect = box.getBoundingClientRect(),
+            var rect = alignit.bounds(box),
                 radsPerPixel = opts.calcRadsPerPixel(currentBounds, control.getViewport()),
                 targetBounds = _calcTargetBounds(currentBounds, rect, radsPerPixel);
 

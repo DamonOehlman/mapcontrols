@@ -41,7 +41,7 @@ MapControls.register('zoom', function(opts) {
             progress = value - opts.min;
             
         // update the slider height
-        sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
+        sliderHeight = sliderHeight || alignit.bounds(slider).height;
         thumb.style.marginTop = (sliderHeight - (progress / range * sliderHeight)) + 'px';
     } // updateThumbPos
 
@@ -91,6 +91,10 @@ MapControls.register('zoom', function(opts) {
         else if (el && el.tagName === 'A') {
             _changeVal(control.value + (reBtnIn.test(el.className) ? 1 : -1));
         }
+        
+        if (typeof evt.cancelBubble != 'undefined') {
+            evt.cancelBubble = true;
+        }
     })(-1);
 
     eve.on('interact.pointer.move.' + id, function(evt, absXY, relXY) {
@@ -105,9 +109,10 @@ MapControls.register('zoom', function(opts) {
             }
             else if (typeof evt.cancelBubble != 'undefined') {
                 evt.cancelBubble = true;
+                evt.returnValue = false;
             } // if..else
 
-            sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
+            sliderHeight = sliderHeight || alignit.bounds(slider).height;
             thumb.style.marginTop = Math.min(
                 sliderHeight, Math.max(0, thumbStart + relXY.y - startY)) + 'px';
         }
@@ -116,7 +121,7 @@ MapControls.register('zoom', function(opts) {
     eve.on('interact.pointer.up.' + id, function(evt, absXY, relXY) {
         // if we are dragging the thumb, then calculate the zoom
         if (startY) {
-            sliderHeight = sliderHeight || slider.getBoundingClientRect().height;
+            sliderHeight = sliderHeight || alignit.bounds(slider).height;
 
             var range = opts.max - opts.min,
                 thumbVal = (sliderHeight - parseInt(thumb.style.marginTop, 10)) / sliderHeight;

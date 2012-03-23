@@ -17,7 +17,7 @@ function Control(element, opts) {
 
 Control.prototype.getViewport = function() {
     if (this.element && this.element.parentNode) {
-        return this.element.parentNode.getBoundingClientRect();
+        return alignit.bounds(this.element.parentNode);
     }
 };
 
