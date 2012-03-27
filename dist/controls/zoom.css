@@ -39,3 +39,6 @@
   width: 100%;
   cursor: pointer;
 }
+.mc-zoom-thumb:active {
+  cursor: row-resize;
+}
