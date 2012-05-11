@@ -1,28 +1,28 @@
 {
-    "name": "mapcontrols",
-    "description": "Generic MapControls for *most* mapping libraries",
-    "tags": ["maps", "ui"],
-    "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
-    "version": "0.1.0",
-    "main": "dist/mapcontrols",
-    
-    "dependencies": {
-    },
-    
-    "devDependencies": {
-        "interleave": "0.1.x",
-        "stylus": "0.22.x"
-    },
-    
-    "repository": {
-        "type": "git",
-        "url": "http://github.com/sidelab/mapcontrols.git"
-    },
-    
-    "bugs": {
-        "web": "http://github.com/sidelab/mapcontrols/issues"
-    },
-
-    "contributors": [
-    ]
+  "name": "mapcontrols",
+  "description": "Generic MapControls for *most* mapping libraries",
+  "tags": [
+    "maps",
+    "ui"
+  ],
+  "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
+  "version": "0.2.0",
+  "main": "dist/mapcontrols",
+  "dependencies": {},
+  "devDependencies": {
+    "interleave": "0.1.x",
+    "stylus": "0.22.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/sidelab/mapcontrols.git"
+  },
+  "bugs": {
+    "url": "http://github.com/sidelab/mapcontrols/issues"
+  },
+  "contributors": [],
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
 }
