@@ -54,7 +54,7 @@ MapControls.register('zoomrect', function(opts) {
         };
     } // _calcTargetBounds
     
-    eve.on('interact.pointer.down.' + id, function(evt, absXY, relXY) {
+    eve.on('interact.down.' + id, function(evt, absXY, relXY) {
         // if the box was not successfully removed before, do that now
         if (box) {
             zoomrect.removeChild(box);
@@ -75,12 +75,12 @@ MapControls.register('zoomrect', function(opts) {
         zoomrect.appendChild(box);
     });
 
-    eve.on('interact.pointer.move.' + id, function(evt, absXY, relXY) {
+    eve.on('interact.move.' + id, function(evt, absXY, relXY) {
         box.style.width = Math.max(0, relXY.x - startXY.x) + 'px';
         box.style.height = Math.max(0, relXY.y - startXY.y) + 'px';
     });
     
-    eve.on('interact.pointer.up.' + id, function(evt, absXY, relXY) {
+    eve.on('interact.up.' + id, function(evt, absXY, relXY) {
         if (currentBounds) {
             // get the box dimensions
             var rect = alignit.bounds(box),

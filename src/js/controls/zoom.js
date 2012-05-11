@@ -82,7 +82,7 @@ MapControls.register('zoom', function(opts) {
         aggressiveCapture: opts.aggressiveCapture
     });
     
-    eve.on('interact.pointer.down.' + id, function(evt, absXY, relXY) {
+    eve.on('interact.down.' + id, function(evt, absXY, relXY) {
         var el = evt.target || evt.srcElement;
         
         if (el === thumb) {
@@ -98,7 +98,7 @@ MapControls.register('zoom', function(opts) {
         }
     })(-1);
 
-    eve.on('interact.pointer.move.' + id, function(evt, absXY, relXY) {
+    eve.on('interact.move.' + id, function(evt, absXY, relXY) {
         if (typeof startY != 'undefined') {
             if (evt.preventDefault) {
                 evt.preventDefault();
@@ -119,7 +119,7 @@ MapControls.register('zoom', function(opts) {
         }
     })(-1);
     
-    eve.on('interact.pointer.up.' + id, function(evt, absXY, relXY) {
+    eve.on('interact.up.' + id, function(evt, absXY, relXY) {
         // if we are dragging the thumb, then calculate the zoom
         if (startY) {
             sliderHeight = sliderHeight || alignit.bounds(slider).height;
