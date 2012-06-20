@@ -150,7 +150,7 @@ var MapControls = (function() {
         }
         
         alignit(control, opts.alignment);
-        control.style.zIndex = opts.zindex || 1000;
+        control.style.zIndex = opts.zindex || 1;
         
         // save the position options in the control 
         if (! control._posOpts) {
