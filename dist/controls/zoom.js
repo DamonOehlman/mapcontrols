@@ -81,6 +81,9 @@ MapControls.register('zoom', function(opts) {
         bindTarget: zoombar,
         aggressiveCapture: opts.aggressiveCapture
     });
+    
+    // prevent cursor changing to a text selection icon for the zoombar
+    zoombar.onselectstart = function() { return false; };
 
     // also watch the document for up events
     interact.watch(document, {
