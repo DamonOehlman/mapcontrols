@@ -81,6 +81,12 @@ MapControls.register('zoom', function(opts) {
         bindTarget: zoombar,
         aggressiveCapture: opts.aggressiveCapture
     });
+
+    // also watch the document for up events
+    interact.watch(document, {
+        ns: 'doc',
+        events: ['up']
+    });
     
     eve.on('interact.down.' + id, function(evt, absXY, relXY) {
         var el = evt.target || evt.srcElement;
@@ -130,8 +136,20 @@ MapControls.register('zoom', function(opts) {
             _changeVal((thumbVal * range | 0) + opts.min);
         }
         
+        // reset the start y and thumb start
         startY = undefined;
+        thumbStart = undefined;
     })(-1);
+    
+    eve.on('doc.up', function() {
+        if (thumbStart) {
+            thumb.style.marginTop = thumbStart + 'px';
+        }
+        
+        // reset the start y and thumb start
+        startY = undefined;
+        thumbStart = undefined;
+    });
     
     // create the control
     control = MapControls._init(zoombar);

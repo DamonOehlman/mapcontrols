@@ -10,8 +10,9 @@
   "main": "dist/mapcontrols",
   "dependencies": {},
   "devDependencies": {
-    "interleave": "0.1.x",
-    "stylus": "0.22.x"
+    "interleave": "0.3.x",
+    "stylus": "0.27.x",
+    "nib": "0.5.x"
   },
   "repository": {
     "type": "git",

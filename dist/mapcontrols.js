@@ -1,3 +1,5 @@
+// req: alignit, eve, classtweak
+
 var MapControls = (function() {
     
     function Control(element, opts) {

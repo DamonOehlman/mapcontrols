@@ -1,7 +1,9 @@
+// req: alignit, eve, classtweak
+
 var MapControls = (function() {
     
     //= controls/base
-    //= snippets!dom/create-element
+    //= github://DamonOehlman/snippets/dom/create-element
     
     /* internals */
     

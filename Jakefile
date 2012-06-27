@@ -1,14 +1,11 @@
 var interleave = require('interleave'),
     fs = require('fs'),
-    path = require('path'),
-    aliases = {
-        'snippets': 'github://DamonOehlman/snippets/$1'
-    };
+    path = require('path');
     
 desc('build the core files');
 task('build.core', function() {
     interleave(['src/css', 'src/js'], {
-        aliases: aliases
+        path: 'dist'
     });
 });
 
@@ -17,7 +14,12 @@ task('build.controls', function() {
     // build each of the css files
     interleave(['src/css/controls', 'src/js/controls'], {
         path: 'dist/controls',
-        aliases: aliases
+        
+        stylus: {
+            plugins: {
+                nib: require('nib')
+            }
+        },
     });
 });
 

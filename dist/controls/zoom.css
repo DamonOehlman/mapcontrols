@@ -2,6 +2,10 @@
   background: url("../images/zoom.png");
   width: 24px;
   height: 200px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .mc-zoom-btn {
   height: 14px;
