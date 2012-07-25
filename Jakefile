@@ -4,22 +4,20 @@ var interleave = require('interleave'),
     
 desc('build the core files');
 task('build.core', function() {
-    interleave(['src/css', 'src/js'], {
-        path: 'dist'
+    interleave(['src/css/*.*', 'src/js/*.*'], {
+        output: 'dist'
     });
 });
 
 desc('build the controls');
 task('build.controls', function() {
     // build each of the css files
-    interleave(['src/css/controls', 'src/js/controls'], {
-        path: 'dist/controls',
+    interleave(['src/css/controls/*.styl', 'src/js/controls/*.js'], {
+        output: 'dist/controls',
         
         stylus: {
-            plugins: {
-                nib: require('nib')
-            }
-        },
+            plugins: [ require('nib') ]
+        }
     });
 });
 

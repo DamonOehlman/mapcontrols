@@ -1,9 +1,10 @@
 CWD=`pwd`
 
 build:
-	@cp -r src/images dist
+	@mkdir -p dist/images
+	@cp -r src/images/ dist/images/
 	@jake
-	
+
 test:
 	# node test/db.js
 

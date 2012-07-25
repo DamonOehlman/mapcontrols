@@ -7,19 +7,18 @@
   ],
   "author": "Damon Oehlman <damon.oehlman@sidelab.com>",
   "version": "0.2.0",
-  "main": "dist/mapcontrols",
   "dependencies": {},
   "devDependencies": {
-    "interleave": "0.3.x",
-    "stylus": "0.27.x",
-    "nib": "0.5.x"
+    "interleave": "0.5.x",
+    "stylus": "0.28.x",
+    "nib": "0.7.x"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/sidelab/mapcontrols.git"
+    "url": "git://github.com/DamonOehlman/mapcontrols.git"
   },
   "bugs": {
-    "url": "http://github.com/sidelab/mapcontrols/issues"
+    "url": "http://github.com/DamonOehlman/mapcontrols/issues"
   },
   "contributors": [],
   "optionalDependencies": {},

@@ -1,4 +1,5 @@
-// req: alignit, eve, classtweak
+
+// req: alignit,eve,classtweak
 
 var MapControls = (function() {
     
@@ -49,7 +50,6 @@ var MapControls = (function() {
         
         return this;
     };
-
     function createElement(tag, attributes, css) {
         var element = document.createElement(tag), key;
         
@@ -68,7 +68,6 @@ var MapControls = (function() {
         
         return element;
     } // createElement
-
     
     /* internals */
     
@@ -149,7 +148,7 @@ var MapControls = (function() {
      * The following options are supported by most controls
      **
      - aggressiveCapture (boolean) whether or not Interact will prevent default events from firing after intercepting events
-     - zindex (number) the CSS `z-index` value (default: 1000)
+     - zindex (number) the CSS `z-index` value (default: 1)
      - prepend (boolean) whether the control should be prepended in the DOM
     \*/
     function add(target, controlType, opts) {
